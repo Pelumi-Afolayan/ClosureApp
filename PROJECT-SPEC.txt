@@ -1,0 +1,392 @@
+CLOSURE — PROJECT HANDOFF FOR CLAUDE
+Prepared: 3 October 2026
+
+Read this before continuing the project. This document records the discussion, decisions, proposed architecture, and next steps. It is a planning handoff, not a report of a completed implementation.
+
+1. CURRENT STATUS — WHAT HAS ACTUALLY BEEN DONE
+
+We have discussed the idea, clarified the audience, outlined the features, proposed a timeline, chosen a styling approach, and proposed a folder structure and database tables.
+
+No Closure code has been written in this conversation. No Vite project has been created, packages installed, screens built, Supabase project configured, database tables created, security policies applied, PWA tested, repository created, or deployment performed. No actual Closure source files, screenshots, credentials, repository URL, or live URL have been supplied.
+
+Do not assume that the proposed file tree exists. Do not claim any feature works until it has been implemented and verified. If the user has since started coding elsewhere, ask for the current files before modifying them.
+
+2. THE USER'S ORIGINAL IDEA AND CONFIRMED REQUIREMENTS
+
+The user wants to build a closure web app that can be installed as a PWA and used on a phone. They confirmed that its focus is breakups.
+
+The user's requested features are:
+- Each person must have an account.
+- Offer options for what they want to achieve.
+- Users must be able to select multiple goals, including every goal.
+- A daily streak counter.
+- Words of encouragement every day.
+- A place to describe what the other person did that hurt them.
+- A place to write whatever they want.
+- A way to record how they feel.
+
+The user specifically corrected the goal selection: it must NOT be a single-choice field. They can choose all options.
+
+Working name: Closure. No logo, final brand identity, domain, or tagline has been approved.
+
+3. PRODUCT PURPOSE AND TONE
+
+The proposed purpose is a private space for people processing a breakup: express what hurt, reflect on feelings, and build a daily check-in habit at their own pace.
+
+Use warm, natural, supportive language. Avoid shaming someone for missing days or having difficult feelings. Do not promise that an app will heal a breakup or measure whether someone has fully recovered. Progress should describe activity and mood history rather than a percentage healed.
+
+Two possible product directions were raised: a gentle journal or a structured programme with daily activities. The user has not chosen between them. The current first-release plan focuses on journaling and check-ins. A structured programme is not an approved requirement.
+
+4. ONBOARDING AND GOALS
+
+Proposed onboarding fields:
+- Preferred name.
+- Goals, with multiple selection.
+- Optional breakup date.
+- Current feelings.
+
+The original suggested goals were:
+1) Move on.
+2) Find peace.
+3) Rebuild confidence.
+4) Accept the breakup.
+5) Reduce/break the urge to reach out.
+
+The later project plan suggested two additional options:
+6) Stop blaming myself.
+7) Understand my feelings.
+
+These last two are planning suggestions, not individually requested by the user. Keep the selection flexible and allow goals to be changed in Settings. Selected goals should guide encouragement and prompts. Do not require the user to prioritise only one goal.
+
+Sensitive story questions should be optional and revisitable, so someone can start using the app without immediately telling their entire story.
+
+5. PROPOSED SCREENS AND NAVIGATION
+
+Welcome:
+- Explain what Closure offers.
+- Show a preview of the experience.
+- Provide signup and login actions.
+
+Account screens:
+- Signup and login.
+- Email verification handling.
+- Forgot password and update password.
+- Clear loading, success, and error states.
+
+Onboarding:
+- Collect the fields described above.
+- Save choices to the profile.
+- Mark onboarding complete and take the user to Today.
+
+Today:
+- Daily encouragement.
+- Mood selection and an optional note.
+- Current check-in streak.
+- A writing prompt and a route into Journal.
+
+My Story:
+- Optional prompts about what happened, what the person did that hurt, and what the user needs now.
+- Save and update answers over time.
+
+Journal:
+- Free writing or prompted writing.
+- List and revisit entries.
+- Create, edit, and delete entries.
+- Include a clearly accessible Unsent Letters area.
+
+Unsent Letters:
+- Write what the user wishes they could say.
+- Store the letter privately as a journal entry type.
+- No sending or contact integration was requested.
+
+Progress:
+- Check-in calendar.
+- Current and longest streak.
+- Mood history.
+- Describe recorded activity without treating every mood as better or worse.
+
+Settings:
+- Change profile details and goals.
+- Proposed appearance controls.
+- Export personal writing.
+- Delete account and personal data.
+- Access PWA install guidance.
+
+Mobile navigation proposal: Today, Journal, My Story, Progress. Settings through a profile icon. Unsent Letters lives inside Journal rather than becoming a fifth main navigation item. Desktop can use a shared sidebar layout.
+
+6. DAILY CHECK-IN AND STREAK RULES
+
+The assistant proposed that the main streak should count consecutive days with a saved mood check-in. The user requested a daily streak but has not explicitly selected its precise counting rule; check-ins are the current working proposal.
+
+Proposed behaviour:
+- A saved mood check-in earns that day's credit.
+- Writing a note is optional.
+- A difficult mood still earns credit.
+- Multiple check-ins or edits on the same day do not add extra streak days.
+- Missing a day breaks the consecutive streak; history and longest streak remain.
+- Encourage returning without guilt.
+
+Implementation details to settle when building:
+- Use a defined user timezone to identify the local check-in date.
+- Prefer one record per user per local date; editing updates that record.
+- Test midnight boundaries, duplicate submissions, missed days, and timezone behaviour.
+- If today has no check-in yet but yesterday does, the streak should remain visible until the user has actually missed the current day.
+
+Possible mood options discussed: sad, angry, relieved, hopeful, numb. Multiple feelings were proposed in the plan. Final labels and any intensity scale have not been chosen.
+
+An optional no-contact counter was suggested for later. It must remain separate from the main daily check-in streak and is not part of the agreed core brief.
+
+7. DAILY ENCOURAGEMENT AND PROMPTS
+
+The first version should use a curated collection of messages and journal prompts organised by goals. No AI integration has been agreed.
+
+Proposed behaviour:
+- Select encouragement relevant to the user's chosen goals.
+- Keep the same message throughout a given local day.
+- Change it on a new day.
+- Avoid unnecessary repeats when practical.
+- Provide prompts while preserving the option to write freely.
+
+No encouragement dataset has been created yet. Content quantity, final copy, and selection algorithm are still to be implemented. Do not assume an external quote API is necessary.
+
+8. TECHNOLOGY AND STYLING DIRECTION
+
+The current proposed stack is:
+- React with JavaScript, using Vite.
+- Tailwind CSS v4.
+- React Router for screens and routing.
+- Supabase for authentication and database storage.
+- Lucide icons.
+- PWA configuration, implementation approach still to be selected.
+
+The user agreed to the Tailwind styling recommendation and then asked for the project structure. JavaScript is the current plan; do not switch to TypeScript without discussing it.
+
+Visual direction proposed:
+- Warm cream background.
+- Muted sage green for main actions and selected options.
+- Dark charcoal text.
+- Rounded cards.
+- Subtle shadows.
+- Generous spacing.
+- Gentle transitions with attention to reduced-motion preferences.
+
+Exact colour values, typography, logo, dark mode, illustrations, and final layouts have not been chosen or built.
+
+Create reusable Button, Input, Card, and Modal components to avoid repeating styling. Keep a small global CSS file for the Tailwind import, shared theme values, fonts, and animations.
+
+9. PROPOSED FOLDER STRUCTURE — NOT CREATED YET
+
+closure/
+  public/
+    icons/                    PWA icons
+  src/
+    assets/                   Images and design assets
+    components/
+      ui/
+        Button.jsx
+        Input.jsx
+        Card.jsx
+        Modal.jsx
+      ProtectedRoute.jsx
+      GoalSelector.jsx
+      MoodSelector.jsx
+      EncouragementCard.jsx
+      StreakCard.jsx
+      JournalEditor.jsx
+      InstallPrompt.jsx
+    layouts/
+      AuthLayout.jsx
+      AppLayout.jsx
+    pages/
+      Welcome.jsx
+      Signup.jsx
+      Login.jsx
+      ForgotPassword.jsx
+      UpdatePassword.jsx
+      Onboarding.jsx
+      Today.jsx
+      MyStory.jsx
+      Journal.jsx
+      JournalEntry.jsx
+      UnsentLetters.jsx
+      Progress.jsx
+      Settings.jsx
+      NotFound.jsx
+    context/
+      AuthContext.jsx
+    hooks/
+      useAuth.js
+    lib/
+      supabase.js
+    services/
+      profileService.js
+      checkInService.js
+      journalService.js
+      storyService.js
+    data/
+      goals.js
+      moods.js
+      encouragements.js
+      journalPrompts.js
+    utils/
+      dates.js
+      streaks.js
+    App.jsx
+    main.jsx
+    index.css
+  .env.local
+  .env.example
+  .gitignore
+  package.json
+  vite.config.js
+
+Folder responsibilities:
+- pages: complete screens associated with routes.
+- components: reusable pieces inside screens.
+- layouts: shared navigation and screen framing.
+- context/hooks: share and access authentication state.
+- lib: configure external clients such as Supabase.
+- services: database reads and writes.
+- data: locally defined content/options.
+- utils: reusable calculations and date handling.
+
+Example: Today.jsx renders MoodSelector, EncouragementCard, and StreakCard. Saving a check-in calls checkInService.js, which uses lib/supabase.js.
+
+Create files as features need them. Do not overwhelm the user with every empty file upfront.
+
+10. DATABASE PROPOSAL — NO SQL HAS BEEN WRITTEN
+
+Supabase Auth handles accounts separately from these application tables:
+
+profiles:
+- User identity linked to the authenticated account.
+- Preferred name.
+- Selected goals (multiple).
+- Timezone.
+- Optional breakup date.
+- Onboarding completion state.
+
+check_ins:
+- Owner/user ID.
+- Local check-in date.
+- Selected moods.
+- Optional note.
+- Creation/update timestamps.
+- Suggested uniqueness: one record per user and local date.
+
+stories:
+- Owner/user ID.
+- Saved responses to story prompts.
+- Creation/update timestamps.
+- Exact response representation is undecided.
+
+journal_entries:
+- Owner/user ID.
+- Entry content, optional title, timestamps.
+- Entry type distinguishing ordinary writing and unsent letters.
+- Optional prompt reference if needed.
+
+The full schema, field types, indexes, migrations, triggers, and row-level security policies still need to be designed.
+
+Every personal table must enforce ownership in the database, not merely hide records in React. Verify that one authenticated account cannot read or change another account's data. Browser environment variables must never contain privileged server credentials. Account deletion needs an appropriate authenticated server-side implementation; do not put admin deletion credentials in the frontend.
+
+11. FIRST-RELEASE SCOPE AND LATER IDEAS
+
+First-release plan:
+- Accounts and protected pages.
+- Multiple goals and editable onboarding choices.
+- Daily encouragement.
+- Mood check-ins and streaks.
+- My Story.
+- Journal and unsent letters.
+- Progress history.
+- Responsive mobile and desktop design.
+- PWA installation.
+- Settings, export, account/data deletion.
+- Correct private access to records.
+
+Suggested later additions:
+- Optional no-contact tracking.
+- Reminders/notifications.
+- Guided daily activities.
+- Richer progress summaries.
+- Offline writing with reliable synchronisation.
+
+Do not present later ideas as implemented or required. PWA installation does not itself mean private journal data is available offline. Decide caching and logout behaviour deliberately before adding offline support.
+
+12. TIMELINE DISCUSSED
+
+Estimate: four weeks at roughly two focused hours on most days. Five to six weeks is more realistic if the user wants to understand each part thoroughly. This is an estimate, not a committed deadline or guarantee.
+
+Week 1:
+- Finalise scope and visual direction.
+- Sketch screens.
+- Set up project and shared styling.
+- Build authentication and onboarding.
+- Milestone: register, log in, and save goals.
+
+Week 2:
+- Today screen.
+- Encouragement content and selection.
+- Mood check-ins.
+- Streak logic.
+- Milestone: daily flow persists real records.
+
+Week 3:
+- My Story.
+- Journal create/edit/delete.
+- Unsent Letters.
+- Progress.
+- Milestone: revisit writing and view history.
+
+Week 4:
+- Settings, export, deletion.
+- PWA and icons.
+- Accessibility and mobile polish.
+- Security and functional verification.
+- Deployment and a small user trial.
+
+No hosting provider has been selected for Closure. Vercel was used for the user's other app, but that is not a deployment decision for this project.
+
+13. VERIFICATION TO PERFORM WHEN IMPLEMENTED
+
+- Signup, login, logout, email verification, and password recovery.
+- Session loading and protected-route behaviour.
+- Redirect incomplete profiles to onboarding without redirect loops.
+- Multiple goals, including selecting all and changing them later.
+- Entry persistence after refresh and repeat login.
+- Journal edit/delete and unsent letter type behaviour.
+- One check-in per local day and correct streak/date boundaries.
+- Privacy between two different accounts.
+- Export and actual removal of records/account.
+- Narrow mobile layouts, keyboard use, accessible labels and contrast.
+- PWA installation on supported actual phones and graceful install guidance elsewhere.
+- Production build and deployment behaviour.
+
+None of these checks has been run yet.
+
+14. HOW TO COLLABORATE WITH THE USER
+
+The user has built React projects with guidance, including an expense tracker using Supabase and Tailwind, a digital yearbook, and a simple ecommerce site. They appreciate plain explanations, small tasks, and knowing which file to edit and why.
+
+Use React JavaScript examples. Give clear file paths and exact placement instructions. Work feature by feature: build the screen, connect data, verify it, then continue. Avoid dumping the entire app at once or introducing extra frameworks without a reason.
+
+Keep the conversation natural, direct, and supportive. Do not import personal relationship details into app content or assume the user's personal experience is the app's sample data.
+
+15. NEXT STEP WHEN CONTINUING IN CLAUDE
+
+Start from planning status unless current source files are supplied.
+
+The immediate next task is project setup and the Welcome screen:
+1) Confirm whether a local Closure project already exists.
+2) If not, guide creation of a React JavaScript Vite project.
+3) Set up Tailwind v4 using current official instructions.
+4) Add routing and icons as needed.
+5) Choose exact theme colours and typography from the cream/sage/charcoal direction.
+6) Build reusable UI basics and the responsive Welcome screen.
+7) Verify that it runs before moving to account screens.
+
+The first end-to-end milestone remains: signup -> choose multiple goals -> arrive on Today. Supabase details will be needed when implementing real accounts, but should not block the initial visual setup.
+
+Suggested message to Claude:
+"Read this handoff and help me continue Closure step by step. We have planned it but have not started coding in this conversation. Preserve the breakup focus, personal accounts, multiple-select goals, daily encouragement, mood check-ins, streaks, and private writing. Start with project setup and the Welcome screen. Give me small tasks with the exact file to change, explain what each part does, and distinguish implemented features from future plans."
