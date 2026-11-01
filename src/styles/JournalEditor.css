@@ -1,0 +1,119 @@
+.journal-editor {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgb(82 108 83 / 20%);
+  border-radius: 1.5rem;
+  background: white;
+}
+
+.journal-editor legend {
+  margin-bottom: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.journal-editor label {
+  display: block;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.journal-editor input,
+.journal-editor select,
+.journal-editor textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.875rem;
+  border: 1px solid rgb(82 108 83 / 40%);
+  border-radius: 0.75rem;
+  background: white;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.journal-editor textarea {
+  min-height: 18rem;
+  resize: vertical;
+}
+
+.journal-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 1.5rem;
+}
+
+.journal-editor-hint {
+  margin-top: 0.875rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.journal-editor-error {
+  margin-top: 1rem;
+  color: #9b2525;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.journal-editor-status {
+  margin-top: 1rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+}
+
+.journal-editor-error:empty,
+.journal-editor-status:empty {
+  margin-top: 0;
+}
+
+.journal-delete {
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: #9b2525;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.journal-editor :disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.journal-leave-dialog {
+  width: min(32rem, calc(100% - 2rem));
+  padding: 2rem;
+  border: 1px solid rgb(82 108 83 / 30%);
+  border-radius: 1.25rem;
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+.journal-leave-dialog::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.journal-leave-dialog h2 {
+  margin-bottom: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+}
+
+.journal-leave-dialog p {
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 540px) {
+  .journal-editor,
+  .journal-leave-dialog {
+    padding: 1.25rem;
+  }
+}

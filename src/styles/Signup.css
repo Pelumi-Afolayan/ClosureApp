@@ -1,0 +1,105 @@
+.signup-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+.signup-panel {
+  width: 100%;
+  max-width: 28rem;
+  padding: 2rem;
+  border: 1px solid rgb(82 108 83 / 15%);
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 80%);
+}
+
+.signup-back {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.signup-panel h1 {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 1.15;
+}
+
+.signup-description {
+  margin-top: 1rem;
+  color: var(--color-muted);
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+}
+
+.signup-form label {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.signup-form input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(82 108 83 / 40%);
+  border-radius: 0.75rem;
+  background: white;
+  font-size: 1rem;
+}
+
+.signup-form input + label {
+  margin-top: 1.5rem;
+}
+
+.signup-hint {
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.signup-form .button {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.signup-form [role="status"] {
+  margin-top: 1rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.signup-form [role="status"]:empty {
+  margin-top: 0;
+}
+
+.signup-login {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.signup-login a {
+  color: var(--color-sage-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+  .signup-panel {
+    padding: 1.5rem;
+  }
+
+  .signup-panel h1 {
+    font-size: 2rem;
+  }
+}

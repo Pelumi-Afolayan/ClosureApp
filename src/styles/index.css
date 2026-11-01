@@ -1,0 +1,112 @@
+:root {
+  --color-cream: #f8f6ef;
+  --color-mist: #e8ede3;
+  --color-sage: #526c53;
+  --color-sage-dark: #3c523e;
+  --color-ink: #292e29;
+  --color-muted: #61675f;
+  --font-sans: "Segoe UI",
+  system-ui,
+  sans-serif;
+  --font-display: Georgia,
+  "Times New Roman",
+  serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-cream);
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+svg {
+  display: block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-sage);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  z-index: 10;
+  padding: .75rem 1rem;
+  background: white;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,583 @@
+.today-shell {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.today-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  border-right: 1px solid rgb(82 108 83 / 15%);
+  background: #f0f1e9;
+}
+
+.today-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  color: var(--color-sage-dark);
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.today-sidebar-label {
+  margin-top: 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+
+.today-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.today-navigation a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+}
+
+.today-navigation a:hover {
+  background: rgb(82 108 83 / 8%);
+}
+
+.today-navigation .today-navigation-current {
+  background: var(--color-sage);
+  color: white;
+}
+
+.today-sidebar-note {
+  display: grid;
+  gap: 1rem;
+  margin-block: auto 2rem;
+  padding: 2rem 0.75rem 0;
+  color: var(--color-sage-dark);
+}
+
+.today-sidebar-note p {
+  max-width: 11rem;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.5;
+}
+
+.today-account {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgb(82 108 83 / 20%);
+}
+
+.today-account-label {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.today-account-email {
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.today-account .button {
+  padding-inline: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.today-error {
+  color: #9b2525;
+  font-size: 0.8125rem;
+}
+
+.today-main {
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: 3.5rem clamp(1.5rem, 4vw, 4.5rem) 2rem;
+}
+
+.today-heading {
+  margin-bottom: 2.25rem;
+}
+
+.today-eyebrow {
+  margin-bottom: 0.875rem;
+  color: var(--color-sage-dark);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+.today-heading h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.today-introduction {
+  margin-top: 1rem;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.today-encouragement {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.5rem;
+  border: 1px solid rgb(82 108 83 / 12%);
+  border-radius: 1.5rem;
+  background: var(--color-mist);
+}
+
+.today-encouragement-copy {
+  max-width: 37rem;
+}
+
+.today-card-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-sage-dark);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.today-encouragement h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  line-height: 1.25;
+}
+
+.today-encouragement-copy > p:last-child {
+  max-width: 32rem;
+  margin-top: 1rem;
+  color: var(--color-sage-dark);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.today-leaf-art {
+  flex-shrink: 0;
+  color: var(--color-sage);
+  transform: rotate(-20deg);
+  opacity: 0.6;
+}
+
+.today-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.today-card {
+  scroll-margin-top: 2rem;
+  padding: 2rem;
+  border: 1px solid rgb(82 108 83 / 15%);
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 80%);
+}
+
+.today-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-sage-dark);
+}
+
+.today-preview-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.today-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  line-height: 1.3;
+}
+
+.today-card-description {
+  margin-top: 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.today-feeling-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.today-feeling {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgb(82 108 83 / 30%);
+  border-radius: 9999px;
+  background: transparent;
+  font-size: 0.8125rem;
+}
+
+.today-feeling:hover {
+  background: var(--color-mist);
+}
+
+.today-feeling[aria-pressed="true"] {
+  border-color: var(--color-sage);
+  background: var(--color-sage);
+  color: white;
+}
+
+.today-preview-note {
+  margin-top: 1rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.today-goals-details {
+  margin-top: 1.5rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+}
+
+.today-goals-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.today-goals-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.today-goals-details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.today-goals-details ul {
+  padding-left: 1.25rem;
+  line-height: 1.9;
+}
+
+.today-goals-details p {
+  margin-top: 0.75rem;
+  line-height: 1.7;
+}
+
+.today-writing {
+  margin-top: 2.5rem;
+}
+
+.today-writing-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.today-writing-heading h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+}
+
+.today-writing-heading > span {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.today-writing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.today-writing-item {
+  padding: 1.5rem;
+  border: 1px solid rgb(82 108 83 / 15%);
+  border-radius: 1rem;
+}
+
+.today-writing-item svg {
+  margin-bottom: 1rem;
+  color: var(--color-sage-dark);
+}
+
+.today-writing-item h3 {
+  font-weight: 600;
+}
+
+.today-writing-item p {
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.today-footer {
+  margin-top: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 1100px) {
+  .today-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .today-leaf-art {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .today-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .today-sidebar {
+    padding: 1.5rem;
+    border-right: 0;
+    border-bottom: 1px solid rgb(82 108 83 / 15%);
+  }
+
+  .today-sidebar-label,
+  .today-sidebar-note {
+    display: none;
+  }
+
+  .today-navigation {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .today-account {
+    padding-top: 1rem;
+  }
+
+  .today-account .button {
+    align-self: flex-start;
+  }
+
+  .today-main {
+    padding-top: 2rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .today-encouragement,
+  .today-card {
+    padding: 1.5rem;
+  }
+
+  .today-writing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.today-saved-goals {
+  display: grid;
+  gap: 0.5rem;
+  margin-block: 1.25rem;
+  padding-left: 1.25rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.today-edit-goals {
+  display: inline-block;
+  padding-block: 0.75rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.check-in-date {
+  margin-top: 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.check-in-form {
+  margin-top: 1.25rem;
+}
+
+.check-in-legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.check-in-form .today-feeling-options {
+  margin-top: 0.875rem;
+}
+
+.check-in-note-label {
+  display: block;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.check-in-note-input {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  padding: 0.875rem;
+  border: 1px solid rgb(82 108 83 / 40%);
+  border-radius: 0.75rem;
+  background: white;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.check-in-save {
+  margin-top: 1rem;
+}
+
+.check-in-form fieldset:disabled {
+  opacity: 0.65;
+}
+
+.check-in-form :disabled {
+  cursor: not-allowed;
+}
+
+.check-in-message {
+  margin-top: 1rem;
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.check-in-error {
+  color: #9b2525;
+}
+
+.check-in-message:empty {
+  margin-top: 0;
+}
+
+.check-in-notice {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgb(82 108 83 / 25%);
+  border-radius: 0.75rem;
+  background: var(--color-mist);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.check-in-notice .button {
+  margin-top: 0.75rem;
+}
+
+.streak-card {
+  margin-top: 1.5rem;
+  padding: 1.75rem 2rem;
+  border: 1px solid rgb(82 108 83 / 20%);
+  border-radius: 1.5rem;
+  background: #f0f1e9;
+}
+
+.streak-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-sage-dark);
+}
+
+.streak-heading h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.streak-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  margin-block: 1.5rem 1rem;
+}
+
+.streak-stats dt {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.streak-stats dd {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--color-sage-dark);
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.streak-stats dd span {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.streak-note {
+  color: var(--color-sage-dark);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.streak-timezone {
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.streak-error {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 540px) {
+  .streak-card {
+    padding: 1.5rem;
+  }
+}
