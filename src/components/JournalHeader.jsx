@@ -12,6 +12,7 @@ export default function JournalHeader() {
       <nav aria-label="Your space" className="journal-navigation">
         <Link to="/today">Today</Link>
         <Link to="/journal">Journal</Link>
+        <Link to="/my-story">My Story</Link>
         <Link to="/journal?type=unsent_letter">Unsent Letters</Link>
       </nav>
     </header>

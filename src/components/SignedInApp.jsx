@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
+import AppLayout from './AppLayout'
+import SignOut from '../pages/SignOut'
 import Button from './ui/Button'
 import { getProfile } from '../services/profileService'
 import { supabase } from '../lib/supabase'
 import Onboarding from '../pages/Onboarding'
 import Today from '../pages/Today'
+import MyStory from '../pages/MyStory'
 import Journal from '../pages/Journal'
 import JournalEntry from '../pages/JournalEntry'
 
@@ -89,44 +92,55 @@ export default function SignedInApp({ user }) {
 
   return (
     <Routes>
-      <Route
-        path="/onboarding"
-        element={(
-          <Onboarding
-            user={user}
-            profile={profile}
-            onComplete={setProfile}
-          />
-        )}
-      />
+      <Route element={profile?.onboarding_complete ? <AppLayout user={user} /> : undefined}>
+        <Route
+          path="/onboarding"
+          element={(
+            <Onboarding
+              user={user}
+              profile={profile}
+              onComplete={setProfile}
+            />
+          )}
+        />
 
-      <Route
-        path="/today"
-        element={profile?.onboarding_complete
-          ? <Today user={user} profile={profile} />
-          : <Navigate to="/onboarding" replace />}
-      />
+        <Route
+          path="/today"
+          element={profile?.onboarding_complete
+            ? <Today user={user} profile={profile} />
+            : <Navigate to="/onboarding" replace />}
+        />
 
-      <Route
-        path="/journal"
-        element={profile?.onboarding_complete
-          ? <Journal user={user} profile={profile} />
-          : <Navigate to="/onboarding" replace />}
-      />
+        <Route
+          path="/journal"
+          element={profile?.onboarding_complete
+            ? <Journal user={user} profile={profile} />
+            : <Navigate to="/onboarding" replace />}
+        />
 
-      <Route
-        path="/journal/new"
-        element={profile?.onboarding_complete
-          ? <JournalEntry user={user} profile={profile} />
-          : <Navigate to="/onboarding" replace />}
-      />
+        <Route
+          path="/journal/new"
+          element={profile?.onboarding_complete
+            ? <JournalEntry user={user} profile={profile} />
+            : <Navigate to="/onboarding" replace />}
+        />
 
-      <Route
-        path="/journal/:entryId"
-        element={profile?.onboarding_complete
-          ? <JournalEntry user={user} profile={profile} />
-          : <Navigate to="/onboarding" replace />}
-      />
+        <Route
+          path="/journal/:entryId"
+          element={profile?.onboarding_complete
+            ? <JournalEntry user={user} profile={profile} />
+            : <Navigate to="/onboarding" replace />}
+        />
+
+        <Route
+          path="/my-story"
+          element={profile?.onboarding_complete
+            ? <MyStory user={user} profile={profile} />
+            : <Navigate to="/onboarding" replace />}
+        />
+
+        <Route path="/sign-out" element={<SignOut />} />
+      </Route>
 
       <Route path="*" element={<Navigate to={destination} replace />} />
     </Routes>

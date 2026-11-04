@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router'
 import { BookOpen, Plus } from 'lucide-react'
 
 import Button from '../components/ui/Button'
-import JournalHeader from '../components/JournalHeader'
 import { getJournalEntries } from '../services/journalService'
 import { formatJournalDate } from '../utils/journalDates'
 import '../styles/Journal.css'
@@ -52,8 +51,6 @@ export default function Journal({ user, profile }) {
 
   return (
     <div className="journal-page">
-      <JournalHeader />
-
       <main className="journal-main" id="journal-main">
         <div className="journal-title-row">
           <div>

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import Button from '../components/ui/Button'
-import JournalHeader from '../components/JournalHeader'
 import JournalEditor from '../components/JournalEditor'
 import { getJournalEntry } from '../services/journalService'
 import { formatJournalDate } from '../utils/journalDates'
@@ -57,8 +56,6 @@ export default function JournalEntry({ user, profile }) {
 
   return (
     <div className="journal-page">
-      <JournalHeader />
-
       <main className="journal-main journal-editor-page">
         <h1>{entryId ? 'Your words, in your own time.' : 'What’s on your mind?'}</h1>
         <p className="journal-description">No perfect words needed. Save whenever you’re ready.</p>
