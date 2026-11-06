@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 
 import { supabase } from './lib/supabase'
 import Welcome from './pages/Welcome'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import SignedInApp from './components/SignedInApp'
 import './styles/Auth.css'
 
@@ -14,6 +16,9 @@ const redirectFailed = redirectParameters.has('error')
   || new URLSearchParams(window.location.search).has('error')
 
 export default function App() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [recoveringPassword, setRecoveringPassword] = useState(false)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [sessionError, setSessionError] = useState('')
@@ -29,8 +34,11 @@ export default function App() {
     }, 15000)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      (event, nextSession) => {
         if (!active) return
+
+        if (event === 'PASSWORD_RECOVERY') setRecoveringPassword(true)
+        if (event === 'SIGNED_OUT') setRecoveringPassword(false)
 
         receivedAuthEvent = true
         window.clearTimeout(timeout)
@@ -87,6 +95,28 @@ export default function App() {
     )
   }
 
+  // Recovery must take priority: an email reset link also signs the user in.
+  if (location.pathname === '/reset-password' || recoveringPassword) {
+    if (location.pathname !== '/reset-password') {
+      return <Navigate to="/reset-password" replace />
+    }
+
+    return (
+      <ResetPassword
+        session={session}
+        linkFailed={redirectFailed}
+        onComplete={() => {
+          setRecoveringPassword(false)
+          navigate('/today', { replace: true })
+        }}
+        onCancel={() => {
+          setRecoveringPassword(false)
+          navigate(session ? '/today' : '/forgot-password', { replace: true })
+        }}
+      />
+    )
+  }
+
   if (session) {
     return <SignedInApp key={session.user.id} user={session.user} />
   }
@@ -103,6 +133,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

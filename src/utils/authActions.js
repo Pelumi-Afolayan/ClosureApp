@@ -24,6 +24,20 @@ export function createAuthActions(client, origin) {
       return data
     },
 
+    async requestPasswordReset(email) {
+      const { error } = await client.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${origin}/reset-password`,
+      })
+
+      if (error) throw error
+    },
+
+    async updatePassword(password) {
+      const { error } = await client.auth.updateUser({ password })
+
+      if (error) throw error
+    },
+
     async continueWithGoogle() {
       const { error } = await client.auth.signInWithOAuth({
         provider: 'google',

@@ -6,6 +6,7 @@ import GoogleButton from '../components/auth/GoogleButton'
 import { authService } from '../services/authService'
 import { getAuthErrorMessage } from '../utils/authActions'
 import '../styles/Login.css'
+import '../styles/PasswordRecovery.css'
 
 export default function Login() {
   const [message, setMessage] = useState('')
@@ -94,6 +95,10 @@ export default function Login() {
             disabled={Boolean(loading)}
             required
           />
+
+          <Link to="/forgot-password" className="password-help-link">
+            Forgot password?
+          </Link>
 
           <Button type="submit" disabled={Boolean(loading)}>
             {loading === 'email' ? 'Logging in…' : 'Log in'}
