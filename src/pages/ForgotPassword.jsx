@@ -1,3 +1,4 @@
+import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import Button from '../components/ui/Button'
@@ -55,7 +56,7 @@ export default function ForgotPassword() {
           <p role="status" className="auth-message">
             {sent && 'If an account exists for that email, you’ll receive a reset link. Check your inbox and spam folder.'}
           </p>
-          <p role="alert" className="auth-message auth-message--error">{error}</p>
+          <Notice variant="error">{error}</Notice>
         </form>
       </section>
     </main>

@@ -1,6 +1,15 @@
 .card {
-  border: 1px solid rgb(82 108 83 / 15%);
-  border-radius: 1.5rem;
-  background: rgb(255 255 255 / 80%);
-  padding: 1.5rem;
+  padding: var(--space-6);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.card.card--tinted {
+  background: var(--sage-100);
+}
+
+.card.card--raised {
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }

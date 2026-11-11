@@ -1,3 +1,4 @@
+import Notice from '../components/ui/Notice'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
@@ -118,12 +119,7 @@ export default function Signup() {
             {loading === 'email' ? 'Creating account…' : 'Create account'}
           </Button>
 
-          <p
-            role={isError ? 'alert' : 'status'}
-            className={isError ? 'auth-message auth-message--error' : 'auth-message'}
-          >
-            {message}
-          </p>
+          <Notice variant={isError ? 'error' : 'success'}>{message}</Notice>
         </form>
 
         <p className="signup-login">

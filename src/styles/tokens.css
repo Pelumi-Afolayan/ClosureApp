@@ -1,0 +1,69 @@
+:root {
+  /* Colour palette */
+  --paper: #faf7f0;
+  --surface: #fff;
+  --ink: #262b26;
+  --text-muted: #565d55;
+  --sage-100: #e4eadf;
+  --sage-600: #4d6750;
+  --sage-800: #35493a;
+  --clay-600: #94502f;
+  --clay-100: #f5e6dc;
+  --danger: #9b2525;
+  --danger-surface: #fff0ed;
+  --on-primary: #fff;
+  --hover-surface: rgb(77 103 80 / 8%);
+  --backdrop: rgb(0 0 0 / 35%);
+  --shadow-soft: 0 1px 3px rgb(0 0 0 / 10%);
+
+  /* Borders */
+  --border-soft: rgb(82 108 83 / 18%);
+  --border-field: #7f8b80;
+  --google-border: #747775;
+  --google-ink: #1f1f1f;
+
+  /* Corner shapes */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 9999px;
+
+  /* Spacing: each step is 4px at the default root size. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-11: 2.75rem;
+  --space-12: 3rem;
+  --space-13: 3.25rem;
+  --space-14: 3.5rem;
+  --space-15: 3.75rem;
+  --space-16: 4rem;
+  --space-17: 4.25rem;
+  --space-18: 4.5rem;
+  --space-19: 4.75rem;
+  --space-20: 5rem;
+  --space-21: 5.25rem;
+  --space-22: 5.5rem;
+  --space-23: 5.75rem;
+  --space-24: 6rem;
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-greeting: "Newsreader", Georgia, serif;
+  --text-small: 0.8125rem;
+  --text-label: 0.875rem;
+  --text-body: 1rem;
+  --text-card-heading: 1.25rem;
+  --text-page-title: clamp(1.75rem, 3vw, 2.25rem);
+  --text-hero: clamp(2.25rem, 5vw, 2.75rem);
+  --text-quote: clamp(1.5rem, 2.4vw, 1.75rem);
+  --text-streak: 1.75rem;
+}

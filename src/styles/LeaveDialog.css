@@ -1,0 +1,38 @@
+.leave-dialog {
+  width: min(32rem, calc(100% - 2rem));
+  max-height: 85dvh;
+  padding: var(--space-8);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+  overflow-y: auto;
+}
+
+.leave-dialog::backdrop {
+  background: var(--backdrop);
+}
+
+.leave-dialog h2 {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-card-heading);
+  font-weight: 600;
+}
+
+.leave-dialog p {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.leave-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 540px) {
+  .leave-dialog {
+    padding: var(--space-5);
+  }
+}

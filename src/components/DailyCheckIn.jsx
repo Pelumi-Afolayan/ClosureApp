@@ -1,7 +1,11 @@
+import LoadingPlaceholder from './ui/LoadingPlaceholder'
 import { useEffect, useRef, useState } from 'react'
-import { Heart } from 'lucide-react'
 
 import Button from './ui/Button'
+import Card from './ui/Card'
+import Chip from './ui/Chip'
+import Field from './ui/Field'
+import Notice from './ui/Notice'
 import { moods } from '../data/moods'
 import { getLocalDate } from '../utils/dates'
 import { getCheckIn, saveCheckIn } from '../services/checkInService'
@@ -142,13 +146,13 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
 
       onSaved?.()
       setHasSavedCheckIn(true)
-      setMessage(`Your check-in for ${checkInDate} is saved.`)
+      setMessage('Thank you for checking in.')
 
       if (readDate(timezone) !== checkInDate) setDayChanged(true)
     } catch {
       if (!mountedRef.current) return
 
-      setMessage('We could not save your check-in. Your answers are still here. Please try again.')
+      setMessage('That didn’t save. What you wrote is still here, so try again.')
       setSaveError(true)
     } finally {
       savingRef.current = false
@@ -157,20 +161,16 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
   }
 
   return (
-    <section
+    <Card
+      as="section"
       id="today-feelings"
       className="today-card today-feelings"
       aria-labelledby="feelings-title"
     >
-      <div className="today-card-heading">
-        <Heart size={21} aria-hidden="true" />
-        <span className="today-preview-label">DAILY CHECK-IN</span>
-      </div>
-
       <h2 id="feelings-title">How are you feeling?</h2>
 
       <p className="today-card-description">
-        More than one feeling can be true. Every feeling counts.
+        Optional. Share how you’re feeling, if you’d like. Your mood does not affect either streak.
       </p>
 
       {checkInDate && (
@@ -181,19 +181,19 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
       )}
 
       {!checkInDate ? (
-        <p role="alert" className="check-in-error">
-          We could not read your profile timezone. Open “Edit my name and goals”
+        <Notice variant="error">
+          We could not read your profile timezone. Open Settings
           and save your profile again before checking in.
-        </p>
+        </Notice>
       ) : (
         <>
-          {loading && <p role="status" className="check-in-notice">Loading your check-in…</p>}
+          {loading && <LoadingPlaceholder label="Loading your check-in…" />}
 
           {loadError && (
             <div className="check-in-notice">
-              <p role="alert">
+              <Notice variant="error">
                 We could not load your saved check-in. Saving is paused to protect your existing note.
-              </p>
+              </Notice>
               <Button secondary onClick={() => setAttempt((current) => current + 1)}>
                 Retry loading
               </Button>
@@ -203,8 +203,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
           {dayChanged && (
             <div className="check-in-notice" role="status">
               <p>
-                A new day has started in your timezone. Your current draft has not
-                been moved to the new day. Loading the new day discards unsaved changes here.
+                It’s a new day. Start today’s check-in? The draft from yesterday won’t carry over.
               </p>
               <Button secondary disabled={saving} onClick={loadNewDay}>
                 Discard draft and load the new day
@@ -218,26 +217,23 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
 
               <div className="today-feeling-options">
                 {moods.map((mood) => (
-                  <button
+                  <Chip
                     key={mood.id}
                     type="button"
-                    className="today-feeling"
-                    aria-pressed={selectedMoods.includes(mood.id)}
+                    selected={selectedMoods.includes(mood.id)}
                     onClick={() => toggleMood(mood.id)}
                   >
                     {mood.label}
-                  </button>
+                  </Chip>
                 ))}
               </div>
 
-              <label htmlFor="check-in-note" className="check-in-note-label">
-                Anything you’d like to add? Optional.
-              </label>
-
-              <textarea
+              <Field
+                as="textarea"
+                label="Anything you’d like to add? Optional."
                 id="check-in-note"
                 name="note"
-                className="check-in-note-input"
+                controlClassName="check-in-note-input"
                 value={note}
                 onChange={(event) => {
                   setNote(event.target.value)
@@ -251,12 +247,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
               </Button>
             </fieldset>
 
-            <p
-              role={saveError ? 'alert' : 'status'}
-              className={saveError ? 'check-in-message check-in-error' : 'check-in-message'}
-            >
-              {message}
-            </p>
+            <Notice variant={saveError ? 'error' : 'success'}>{message}</Notice>
           </form>
 
           <p className="today-preview-note">
@@ -264,6 +255,6 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
           </p>
         </>
       )}
-    </section>
+    </Card>
   )
 }

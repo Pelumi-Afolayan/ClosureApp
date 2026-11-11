@@ -2,73 +2,73 @@
   display: grid;
   place-items: center;
   min-height: 100vh;
-  padding: 2rem 1.5rem;
+  padding: var(--space-8) var(--space-6);
 }
 
 .login-panel {
   width: 100%;
   max-width: 28rem;
-  padding: 2rem;
-  border: 1px solid rgb(82 108 83 / 15%);
-  border-radius: 1.5rem;
-  background: rgb(255 255 255 / 80%);
+  padding: var(--space-8);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
 .login-back {
   display: inline-block;
-  margin-bottom: 2rem;
-  color: var(--color-sage-dark);
-  font-size: 0.875rem;
+  margin-bottom: var(--space-8);
+  color: var(--sage-800);
+  font-size: var(--text-label);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
 .login-panel h1 {
   font-family: var(--font-display);
-  font-size: 2.25rem;
+  font-size: var(--text-page-title);
   line-height: 1.15;
 }
 
 .login-description {
-  margin-top: 1rem;
-  color: var(--color-muted);
+  margin-top: var(--space-4);
+  color: var(--text-muted);
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  margin-top: 2rem;
+  margin-top: var(--space-8);
 }
 
 .login-form label {
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-label);
   font-weight: 600;
 }
 
 .login-form input {
   width: 100%;
   min-height: 3rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgb(82 108 83 / 40%);
-  border-radius: 0.75rem;
-  background: white;
-  font-size: 1rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: var(--text-body);
 }
 
 .login-form input + label {
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
 }
 
 .login-form .button {
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
 }
 
 .login-form [role="status"] {
-  margin-top: 1rem;
-  color: var(--color-sage-dark);
-  font-size: 0.875rem;
+  margin-top: var(--space-4);
+  color: var(--sage-800);
+  font-size: var(--text-label);
   overflow-wrap: anywhere;
 }
 
@@ -77,12 +77,12 @@
 }
 
 .login-signup {
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
+  margin-top: var(--space-6);
+  font-size: var(--text-label);
 }
 
 .login-signup a {
-  color: var(--color-sage-dark);
+  color: var(--sage-800);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -90,10 +90,10 @@
 
 @media (max-width: 480px) {
   .login-panel {
-    padding: 1.5rem;
+    padding: var(--space-6);
   }
 
   .login-panel h1 {
-    font-size: 2rem;
+    font-size: var(--text-page-title);
   }
 }

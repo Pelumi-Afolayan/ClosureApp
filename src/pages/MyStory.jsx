@@ -1,11 +1,15 @@
+import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useBlocker } from 'react-router'
 
 import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import Field from '../components/ui/Field'
+import LeaveDialog from '../components/ui/LeaveDialog'
+import Notice from '../components/ui/Notice'
 import { getStory, saveStory } from '../services/storyService'
 import { storyAnswers } from '../utils/storyRequests'
 import { formatJournalDate } from '../utils/journalDates'
-import '../styles/Journal.css'
 import '../styles/MyStory.css'
 
 function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
@@ -92,11 +96,11 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
       setAnswers(saved)
       setSavedAnswers(JSON.stringify(saved))
       setUpdatedAt(savedStory.updated_at)
-      setMessage('Your story is saved.')
+      setMessage('Saved. You can come back to this any time.')
       setCompletedStory(savedStory)
     } catch {
       if (activeRef.current) {
-        setErrorMessage('We could not save your story. Your answers are still here. Please try again.')
+        setErrorMessage('That didn’t save. What you wrote is still here, so try again.')
       }
     } finally {
       savingRef.current = false
@@ -112,46 +116,45 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
         </p>
       )}
 
-      <form className="story-form" onSubmit={handleSave} aria-busy={saving}>
+      <Card as="form" variant="tinted" className="story-form" onSubmit={handleSave} aria-busy={saving}>
         <fieldset disabled={saving}>
           <legend>Your story, in your own time</legend>
+          <div className="story-edit-state">
+            <span className="story-editing-badge">You’re editing</span>
+            <span role="status">{saving ? 'Saving…' : hasUnsavedChanges ? 'Unsaved changes' : story ? 'All changes saved' : 'Not saved yet'}</span>
+          </div>
 
-          <label htmlFor="what-happened">What happened?</label>
-          <p id="happened-hint" className="story-hint">
-            Start wherever feels right. A few words are enough.
-          </p>
-          <textarea
+          <Field
+            as="textarea"
+            label={<><span className="story-question-number" aria-hidden="true">1 of 3</span>What happened?</>}
+            hint="Start wherever feels right. A few words are enough."
+            autoFocus
             id="what-happened"
             name="whatHappened"
             value={answers.whatHappened}
             onChange={(event) => changeAnswer('whatHappened', event.target.value)}
-            aria-describedby="happened-hint"
             rows={5}
           />
 
-          <label htmlFor="what-hurt">What hurt you?</label>
-          <p id="hurt-hint" className="story-hint">
-            Only share what you feel ready to put into words.
-          </p>
-          <textarea
+          <Field
+            as="textarea"
+            label={<><span className="story-question-number" aria-hidden="true">2 of 3</span>What hurt you?</>}
+            hint="Only share what you feel ready to put into words."
             id="what-hurt"
             name="whatHurt"
             value={answers.whatHurt}
             onChange={(event) => changeAnswer('whatHurt', event.target.value)}
-            aria-describedby="hurt-hint"
             rows={5}
           />
 
-          <label htmlFor="what-i-need">What do you need now?</label>
-          <p id="need-hint" className="story-hint">
-            It’s okay if you’re still figuring that out.
-          </p>
-          <textarea
+          <Field
+            as="textarea"
+            label={<><span className="story-question-number" aria-hidden="true">3 of 3</span>What do you need now?</>}
+            hint="It’s okay if you’re still figuring that out."
             id="what-i-need"
             name="whatINeed"
             value={answers.whatINeed}
             onChange={(event) => changeAnswer('whatINeed', event.target.value)}
-            aria-describedby="need-hint"
             rows={5}
           />
 
@@ -167,45 +170,22 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
           </div>
         </fieldset>
 
-        <p role="alert" className="story-error">{errorMessage}</p>
-        <p role="status" className="story-status">{message}</p>
+        <Notice variant="error" title="Couldn’t save">{errorMessage}</Notice>
+        <Notice variant="success">{message}</Notice>
         <p className="story-hint">
           {hasUnsavedChanges
             ? 'You have unsaved changes.'
             : 'Answers save only when you click Save my story. You can clear an answer and save it blank.'}
         </p>
-      </form>
+      </Card>
 
-      <dialog
-        ref={dialogRef}
-        className="story-leave-dialog"
-        aria-labelledby="story-leave-title"
-        aria-describedby="story-leave-description"
-        onCancel={(event) => {
-          event.preventDefault()
-          if (blocker.state === 'blocked') blocker.reset()
-        }}
-      >
-        <h2 id="story-leave-title">Keep your changes?</h2>
-        <p id="story-leave-description">
-          {saving
-            ? 'Please wait for saving to finish before leaving.'
-            : 'Your changes haven’t been saved. Stay to keep writing, or discard the changes and leave.'}
-        </p>
-        <div className="story-actions">
-          <Button type="button" onClick={() => blocker.state === 'blocked' && blocker.reset()}>
-            Stay here
-          </Button>
-          <Button
-            type="button"
-            secondary
-            disabled={saving}
-            onClick={() => blocker.state === 'blocked' && blocker.proceed()}
-          >
-            Discard and leave
-          </Button>
-        </div>
-      </dialog>
+      <LeaveDialog
+        dialogRef={dialogRef}
+        idPrefix="story-leave"
+        busy={saving}
+        onStay={() => blocker.state === 'blocked' && blocker.reset()}
+        onLeave={() => blocker.state === 'blocked' && blocker.proceed()}
+      />
     </>
   )
 }
@@ -224,29 +204,29 @@ function StoryReader({ story, timezone, onEdit }) {
   ]
 
   return (
-    <article className="story-reader" aria-label="Your saved story">
+    <Card as="article" className="story-reader" aria-label="Your saved story">
       <div className="story-reader-toolbar">
-        <p className="story-last-saved">
-          Last saved {formatJournalDate(story.updated_at, timezone)}
-        </p>
-        <Button type="button" onClick={onEdit}>Edit my story</Button>
+        <div>
+          <h2 className="story-reader-title" ref={firstHeadingRef} tabIndex={-1}>Your story</h2>
+          <p className="story-last-saved">Last saved {formatJournalDate(story.updated_at, timezone)}</p>
+        </div>
+        <Button type="button" variant="secondary" onClick={onEdit}>Edit</Button>
       </div>
 
-      {sections.map((section, index) => (
+      {sections.map((section) => (
         <section key={section.title} className="story-reader-section">
-          <h2 ref={index === 0 ? firstHeadingRef : undefined} tabIndex={-1}>
+          <h2>
             {section.title}
           </h2>
           {section.answer?.trim() ? (
             <p className="story-reader-answer">{section.answer}</p>
           ) : (
-            <p className="story-reader-empty">You haven’t answered this yet. That’s okay.</p>
+            <p className="story-reader-empty">Not written yet. That’s okay.</p>
           )}
         </section>
       ))}
 
-      <Link to="/today" className="button button--secondary">Back to Today</Link>
-    </article>
+    </Card>
   )
 }
 
@@ -260,7 +240,7 @@ export default function MyStory({ user, profile }) {
   const handleSaved = useCallback((savedStory) => {
     setResult({ owner: user.id, story: savedStory, loading: false })
     setEditing(false)
-    setSavedMessage('Your story is saved.')
+    setSavedMessage('Saved. You can come back to this any time.')
   }, [user.id])
 
   useEffect(() => {
@@ -296,9 +276,8 @@ export default function MyStory({ user, profile }) {
   }
 
   return (
-    <div className="journal-page">
+    <div className="story-page">
       <main className="story-main">
-        <p className="journal-eyebrow">NO NEED TO TELL IT ALL AT ONCE</p>
         <h1>My Story</h1>
         <p className="story-introduction">
           A place to reflect on what happened and what you need now.
@@ -306,19 +285,19 @@ export default function MyStory({ user, profile }) {
         </p>
 
         {loading ? (
-          <p role="status" className="story-notice">Loading your story…</p>
+          <LoadingPlaceholder label="Loading your story…" lines={5} />
         ) : result.error ? (
           <div className="story-notice">
-            <p role="alert">
-              We could not load your story. Saving is paused so existing answers aren’t accidentally overwritten.
-            </p>
+            <Notice variant="error">
+              We couldn’t load this right now. Your saved writing hasn’t changed. Saving is paused until we can load it.
+            </Notice>
             <Button secondary onClick={() => setAttempt((current) => current + 1)}>
               Retry
             </Button>
           </div>
         ) : (
           <>
-            <p role="status" className="story-status">{savedMessage}</p>
+            <Notice variant="success">{savedMessage}</Notice>
             {result.story && !editing ? (
               <StoryReader
                 story={result.story}

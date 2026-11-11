@@ -1,3 +1,4 @@
+import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'
 import Button from '../components/ui/Button'
 import { authService } from '../services/authService'
@@ -44,7 +45,7 @@ export default function ResetPassword({ session, linkFailed, onComplete, onCance
 
         {!canReset ? (
           <div className="password-recovery-result">
-            <p role="alert">This reset link is unavailable or has expired. Please request a new email.</p>
+            <Notice variant="error">This reset link is unavailable or has expired. Please request a new email.</Notice>
             <Button onClick={onCancel}>{session ? 'Back to my space' : 'Request a new link'}</Button>
           </div>
         ) : saved ? (
@@ -79,7 +80,7 @@ export default function ResetPassword({ session, linkFailed, onComplete, onCance
               <Button type="submit" disabled={busy}>
                 {busy ? 'Saving…' : 'Save new password'}
               </Button>
-              <p role="alert" className="auth-message auth-message--error">{error}</p>
+              <Notice variant="error">{error}</Notice>
             </form>
           </>
         )}

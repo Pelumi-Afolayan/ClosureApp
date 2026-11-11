@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Leaf, Sun } from 'lucide-react'
+import { Sun } from 'lucide-react'
 
 import { encouragements } from '../data/encouragements'
 import { getLocalDate } from '../utils/dates'
@@ -42,7 +42,7 @@ export default function DailyEncouragement({ userId, selectedGoals, timezone }) 
       <div className="today-encouragement-copy">
         <p className="today-card-eyebrow">
           <Sun size={18} aria-hidden="true" />
-          A LITTLE ENCOURAGEMENT
+          Words for today
         </p>
 
         <h2 id="encouragement-title">{encouragement.text}</h2>
@@ -54,9 +54,6 @@ export default function DailyEncouragement({ userId, selectedGoals, timezone }) 
         </p>
       </div>
 
-      <div className="today-leaf-art" aria-hidden="true">
-        <Leaf size={104} strokeWidth={1} />
-      </div>
     </section>
   )
 }

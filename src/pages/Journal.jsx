@@ -1,8 +1,12 @@
+import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
+import Notice from '../components/ui/Notice'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { BookOpen, Plus } from 'lucide-react'
+import { BookOpen, PenLine, Plus } from 'lucide-react'
 
 import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import Chip from '../components/ui/Chip'
 import { getJournalEntries } from '../services/journalService'
 import { formatJournalDate } from '../utils/journalDates'
 import '../styles/Journal.css'
@@ -50,12 +54,11 @@ export default function Journal({ user, profile }) {
     : '/journal/new'
 
   return (
-    <div className="journal-page">
+    <div className={`journal-page${entryType === 'unsent_letter' ? ' journal-page--letters' : ''}`}>
       <main className="journal-main" id="journal-main">
         <div className="journal-title-row">
           <div>
-            <p className="journal-eyebrow">ROOM FOR YOUR WORDS</p>
-            <h1>{entryType === 'unsent_letter' ? 'Unsent Letters' : 'Your journal'}</h1>
+            <h1 className="journal-page-title">{entryType === 'unsent_letter' ? 'Unsent Letters' : 'Journal'}</h1>
             <p className="journal-description">
               {entryType === 'unsent_letter'
                 ? 'Say what you need to say. These letters are saved here, never sent.'
@@ -70,45 +73,44 @@ export default function Journal({ user, profile }) {
         </div>
 
         <nav className="journal-filters" aria-label="Filter writing">
-          <Link to="/journal" aria-current={entryType === 'all' ? 'page' : undefined}>All writing</Link>
-          <Link to="/journal?type=journal" aria-current={entryType === 'journal' ? 'page' : undefined}>Journal entries</Link>
-          <Link to="/journal?type=unsent_letter" aria-current={entryType === 'unsent_letter' ? 'page' : undefined}>Unsent letters</Link>
+          <Chip as={Link} to="/journal" selected={entryType === 'all'}>All writing</Chip>
+          <Chip as={Link} to="/journal?type=journal" selected={entryType === 'journal'}>Journal entries</Chip>
+          <Chip as={Link} to="/journal?type=unsent_letter" selected={entryType === 'unsent_letter'}>Unsent letters</Chip>
         </nav>
 
         {loading ? (
-          <p role="status" className="journal-empty">Loading your writing…</p>
+          <LoadingPlaceholder label="Loading your writing…" lines={4} />
         ) : result.error ? (
           <div className="journal-empty">
-            <p role="alert">We could not load your entries. Please try again.</p>
+            <Notice variant="error">We couldn’t load this right now. Your saved writing hasn’t changed.</Notice>
             <Button secondary onClick={() => setAttempt((current) => current + 1)}>Retry</Button>
           </div>
         ) : result.entries.length === 0 ? (
           <section className="journal-empty" aria-label="No entries">
-            <BookOpen size={32} aria-hidden="true" />
-            <h2>{page === 1 ? 'Start wherever you are.' : 'No more entries on this page.'}</h2>
-            <p>{page === 1 ? 'A sentence is enough. There’s no right way to begin.' : 'Use Previous to return to your writing.'}</p>
-            {page === 1 && <Link to={newEntryUrl} className="button button--primary">Write your first entry</Link>}
+            {entryType === 'unsent_letter'
+              ? <PenLine size={32} aria-hidden="true" />
+              : <BookOpen size={32} aria-hidden="true" />}
+            <h2>{page === 1 ? (entryType === 'unsent_letter' ? 'Write your first letter' : 'Start wherever you are.') : 'No more writing on this page.'}</h2>
+            <p>{page === 1 ? (entryType === 'unsent_letter' ? 'This stays here. It isn’t sent to anyone.' : 'A sentence is enough. There’s no right way to begin.') : 'Use Previous to return to your writing.'}</p>
+            {page === 1 && <Link to={newEntryUrl} className="button button--primary">{entryType === 'unsent_letter' ? 'Write a letter' : 'Write your first entry'}</Link>}
           </section>
         ) : (
           <ul className="journal-list">
             {result.entries.map((entry) => (
               <li key={entry.id}>
-                <Link to={`/journal/${entry.id}`} className="journal-entry-card">
+                <Card as={Link} to={`/journal/${entry.id}`} className={`journal-entry-card${entry.entry_type === 'unsent_letter' ? ' journal-entry-card--letter' : ''}`}>
+                  <p className="journal-entry-date">{formatJournalDate(entry.created_at, profile.timezone)}</p>
+                  <h2>{entry.title || (entry.entry_type === 'unsent_letter' ? 'Untitled letter' : 'Untitled entry')}</h2>
                   <span className="journal-entry-type">
                     {entry.entry_type === 'unsent_letter' ? 'Unsent letter' : 'Journal entry'}
                   </span>
-                  <h2>{entry.title || 'Untitled entry'}</h2>
-                  <p>
-                    Created {formatJournalDate(entry.created_at, profile.timezone)}
-                    {' · '}Open to read or edit
-                  </p>
-                </Link>
+                </Card>
               </li>
             ))}
           </ul>
         )}
 
-        {!loading && !result.error && (
+        {!loading && !result.error && (page > 1 || result.hasMore) && (
           <nav className="journal-pagination" aria-label="Entry pages">
             {page > 1 && <Link to={pageUrl(page - 1)} className="button button--secondary">Previous</Link>}
             <span>Page {page}</span>

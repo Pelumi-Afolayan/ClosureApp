@@ -1,0 +1,33 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--sage-800);
+  font-size: var(--text-label);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.chip:hover {
+  background: var(--sage-100);
+  color: var(--sage-800);
+}
+
+.chip--selected,
+.chip--selected:hover {
+  border-color: var(--sage-600);
+  background: var(--sage-100);
+  color: var(--sage-800);
+  font-weight: 600;
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+}

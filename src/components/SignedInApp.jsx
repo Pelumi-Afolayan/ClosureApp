@@ -1,7 +1,11 @@
+import LoadingPlaceholder from './ui/LoadingPlaceholder'
+import Notice from './ui/Notice'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import AppLayout from './AppLayout'
+import ActivityProvider from './ActivityProvider'
+import NoContact from '../pages/NoContact'
 import SignOut from '../pages/SignOut'
 import Button from './ui/Button'
 import { getProfile } from '../services/profileService'
@@ -66,8 +70,8 @@ export default function SignedInApp({ user }) {
 
   if (loading) {
     return (
-      <main className="auth-state" role="status">
-        Getting your space ready…
+      <main className="auth-state">
+        <LoadingPlaceholder label="Getting your space ready…" />
       </main>
     )
   }
@@ -75,7 +79,7 @@ export default function SignedInApp({ user }) {
   if (errorMessage) {
     return (
       <main className="auth-state">
-        <p role="alert">{errorMessage}</p>
+        <Notice variant="error">{errorMessage}</Notice>
 
         <Button onClick={() => setAttempt((current) => current + 1)}>
           Retry
@@ -92,7 +96,11 @@ export default function SignedInApp({ user }) {
 
   return (
     <Routes>
-      <Route element={profile?.onboarding_complete ? <AppLayout user={user} /> : undefined}>
+      <Route element={profile?.onboarding_complete ? (
+        <ActivityProvider key={`${user.id}:${profile.timezone}`} userId={user.id} timezone={profile.timezone}>
+          <AppLayout />
+        </ActivityProvider>
+      ) : undefined}>
         <Route
           path="/onboarding"
           element={(
@@ -137,6 +145,11 @@ export default function SignedInApp({ user }) {
           element={profile?.onboarding_complete
             ? <MyStory user={user} profile={profile} />
             : <Navigate to="/onboarding" replace />}
+        />
+
+        <Route
+          path="/no-contact"
+          element={profile?.onboarding_complete ? <NoContact /> : <Navigate to="/onboarding" replace />}
         />
 
         <Route path="/sign-out" element={<SignOut />} />

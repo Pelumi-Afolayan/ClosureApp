@@ -1,3 +1,4 @@
+import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import Button from '../components/ui/Button'
@@ -33,7 +34,7 @@ export default function SignOut() {
         {busy ? 'Signing out…' : 'Sign out of all devices'}
       </Button>
       <Link to="/today">Stay in my space</Link>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice variant="error">{error}</Notice>}
     </main>
   )
 }

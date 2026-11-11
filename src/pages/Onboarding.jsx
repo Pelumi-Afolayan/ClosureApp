@@ -1,6 +1,7 @@
+import Notice from '../components/ui/Notice'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Leaf } from 'lucide-react'
+import { Check, Leaf } from 'lucide-react'
 
 import Button from '../components/ui/Button'
 import { goals } from '../data/goals'
@@ -147,6 +148,7 @@ export default function Onboarding({ user, profile, onComplete }) {
                   />
 
                   <span>{goal.label}</span>
+                  {selectedGoals.includes(goal.id) && <Check size={18} aria-hidden="true" />}
                 </label>
               ))}
             </div>
@@ -156,9 +158,9 @@ export default function Onboarding({ user, profile, onComplete }) {
             </p>
           </fieldset>
 
-          <p role="alert" className="onboarding-error">
+          <Notice variant="error">
             {errorMessage}
-          </p>
+          </Notice>
 
           <Button type="submit" disabled={busy} className="onboarding-submit">
             {saving ? 'Saving…' : 'Continue to my space'}

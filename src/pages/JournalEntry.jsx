@@ -1,3 +1,5 @@
+import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
+import Notice from '../components/ui/Notice'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 
@@ -57,14 +59,14 @@ export default function JournalEntry({ user, profile }) {
   return (
     <div className="journal-page">
       <main className="journal-main journal-editor-page">
-        <h1>{entryId ? 'Your words, in your own time.' : 'What’s on your mind?'}</h1>
+        <h1 className="journal-page-title">{entry?.entry_type === 'unsent_letter' ? 'Unsent letter' : entryId ? 'Journal entry' : 'New entry'}</h1>
         <p className="journal-description">No perfect words needed. Save whenever you’re ready.</p>
 
         {loading ? (
-          <p role="status" className="journal-empty">Loading your entry…</p>
+          <LoadingPlaceholder label="Loading your entry…" lines={5} />
         ) : result?.error && entryId ? (
           <div className="journal-empty">
-            <p role="alert">We could not load this entry. Your saved writing has not been changed.</p>
+            <Notice variant="error">We couldn’t load this right now. Your saved writing hasn’t changed.</Notice>
             <Button secondary onClick={() => setAttempt((current) => current + 1)}>Retry</Button>
             <Link to="/journal">Back to Journal</Link>
           </div>
@@ -75,7 +77,7 @@ export default function JournalEntry({ user, profile }) {
           </div>
         ) : (
           <>
-            {entryId && location.state?.saved && <p role="status" className="journal-editor-status">Your writing is saved.</p>}
+            {entryId && location.state?.saved && <p role="status" className="journal-editor-status">Saved. You can come back to this any time.</p>}
             {entryId && (
               <p className="journal-entry-dates">
                 Created {formatJournalDate(entry.created_at, profile.timezone)}

@@ -1,3 +1,4 @@
+import Notice from '../components/ui/Notice'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
@@ -104,9 +105,9 @@ export default function Login() {
             {loading === 'email' ? 'Logging in…' : 'Log in'}
           </Button>
 
-          <p role="alert" className="auth-message auth-message--error">
+          <Notice variant="error">
             {message}
-          </p>
+          </Notice>
         </form>
 
         <p className="login-signup">

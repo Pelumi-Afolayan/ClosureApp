@@ -2,41 +2,67 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .5rem;
+  gap: var(--space-2);
   min-height: 3rem;
   border: 1px solid transparent;
-  border-radius: 9999px;
-  padding: .75rem 1.5rem;
-  font-size: .875rem;
+  border-radius: var(--radius-pill);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-label);
   font-weight: 600;
   transition: background-color .15s,
   color .15s;
 }
 
 .button--primary {
-  background: var(--color-sage);
-  color: white;
+  background: var(--sage-600);
+  color: var(--on-primary);
 }
 
 .button--primary:hover {
-  background: var(--color-sage-dark);
+  background: var(--sage-800);
 }
 
 .button--secondary {
   background: transparent;
-  border-color: rgb(82 108 83 / 30%);
+  border-color: var(--border-soft);
 }
 
 .button--secondary:hover {
-  background: var(--color-mist);
+  background: var(--sage-100);
 }
 
 .auth-google-button {
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
 }
 
 .button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+.button--quiet {
+  min-height: 2.75rem;
+  background: transparent;
+  color: var(--sage-800);
+}
+
+.button--quiet:hover {
+  background: var(--sage-100);
+}
+
+.button--danger {
+  min-height: 2.75rem;
+  border-color: var(--danger);
+  background: var(--danger-surface);
+  color: var(--danger);
+}
+
+.button--danger:hover {
+  background: var(--danger);
+  color: var(--on-primary);
+}
+
+.button--secondary {
+  min-height: 2.75rem;
+  color: var(--sage-800);
 }

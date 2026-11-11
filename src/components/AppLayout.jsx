@@ -1,25 +1,41 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { BookOpen, Heart, Leaf, LogOut, Menu, MessageCircle, Settings, Sun, Target, X } from 'lucide-react'
+import { BookHeart, BookOpen, Leaf, LogOut, PenLine, Settings, ShieldCheck, Sun, UserRound, X } from 'lucide-react'
 import '../styles/AppLayout.css'
 
 const navigation = [
-  { to: '/today', label: 'Today', icon: Sun },
-  { to: '/today#encouragement-title', label: 'Words for today', icon: Leaf },
-  { to: '/today#today-feelings', label: 'A moment to check in', icon: Heart },
-  { to: '/today#today-next', label: 'What’s next', icon: Target },
-  { to: '/journal', label: 'Journal', icon: BookOpen },
-  { to: '/journal?type=unsent_letter', label: 'Unsent Letters', icon: MessageCircle },
-  { to: '/my-story', label: 'My Story', icon: Leaf },
+  { to: '/today', label: 'Today', mobileLabel: 'Today', icon: Sun },
+  { to: '/journal', label: 'Journal', mobileLabel: 'Journal', icon: BookOpen },
+  { to: '/journal?type=unsent_letter', label: 'Unsent letters', mobileLabel: 'Letters', icon: PenLine },
+  { to: '/no-contact', label: 'No contact', mobileLabel: 'No contact', icon: ShieldCheck },
+  { to: '/my-story', label: 'My Story', mobileLabel: 'My Story', icon: BookHeart },
 ]
 
-export default function AppLayout({ user }) {
+function AccountLinks({ onNavigate }) {
+  return (
+    <div className="app-account">
+      <Link to="/onboarding" onClick={onNavigate}>
+        <Settings size={16} aria-hidden="true" />
+        Settings
+      </Link>
+      <Link to="/sign-out" onClick={onNavigate}>
+        <LogOut size={16} aria-hidden="true" />
+        Logout
+      </Link>
+    </div>
+  )
+}
+
+export default function AppLayout() {
   const location = useLocation()
-  const [openLocation, setOpenLocation] = useState(null)
-  const menuOpen = openLocation === location.key
-  const currentPath = location.pathname + location.search + location.hash
+  const accountDialogRef = useRef(null)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const lettersSelected = new URLSearchParams(location.search).get('type') === 'unsent_letter'
+  const accountSelected = ['/onboarding', '/sign-out'].includes(location.pathname)
 
   useEffect(() => {
+    accountDialogRef.current?.close()
+
     if (location.hash) {
       document.getElementById(location.hash.slice(1))?.scrollIntoView()
     } else {
@@ -27,12 +43,33 @@ export default function AppLayout({ user }) {
     }
   }, [location.key, location.hash])
 
-  function isCurrent(to) {
-    if (to === '/journal') {
-      return location.pathname.startsWith('/journal') &&
-        new URLSearchParams(location.search).get('type') !== 'unsent_letter'
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 801px)')
+
+    function closeOnDesktop(event) {
+      if (event.matches) accountDialogRef.current?.close()
     }
-    return currentPath === to
+
+    desktop.addEventListener('change', closeOnDesktop)
+    return () => desktop.removeEventListener('change', closeOnDesktop)
+  }, [])
+
+  function isCurrent(to) {
+    if (to === '/journal' || to === '/journal?type=unsent_letter') {
+      return location.pathname.startsWith('/journal') &&
+        lettersSelected === to.includes('unsent_letter')
+    }
+
+    return location.pathname === to
+  }
+
+  function closeAccount() {
+    accountDialogRef.current?.close()
+  }
+
+  function openAccount() {
+    accountDialogRef.current?.showModal()
+    setAccountOpen(true)
   }
 
   return (
@@ -40,62 +77,79 @@ export default function AppLayout({ user }) {
       <a className="skip-link" href="#app-content">Skip to content</a>
 
       <aside className="app-sidebar" aria-label="Your space">
-        <div className="app-sidebar-heading">
-          <Link to="/today" className="app-brand" aria-label="Closure home">
-            <Leaf size={25} aria-hidden="true" />
-            closure.
-          </Link>
-          <button
-            type="button"
-            className="app-menu-toggle"
-            aria-expanded={menuOpen}
-            aria-controls="app-sidebar-menu"
-            onClick={() => setOpenLocation(menuOpen ? null : location.key)}
-          >
-            {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
-            {menuOpen ? 'Close' : 'Menu'}
-          </button>
-        </div>
+        <Link to="/today" className="app-brand" aria-label="Closure home">
+          <Leaf size={25} aria-hidden="true" />
+          closure.
+        </Link>
 
-        <div id="app-sidebar-menu" className={`app-sidebar-menu${menuOpen ? ' is-open' : ''}`}>
-          <p className="app-sidebar-label">YOUR SPACE</p>
+        <div className="app-sidebar-menu">
+          <p className="app-sidebar-label">Your space</p>
           <nav className="app-navigation" aria-label="Your space pages">
             {navigation.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
-                className={isCurrent(to) ? 'app-navigation-current' : undefined}
-                aria-current={isCurrent(to) ? (to.includes('#') ? 'location' : 'page') : undefined}
+                aria-current={isCurrent(to) ? 'page' : undefined}
               >
-                <Icon size={19} aria-hidden="true" />
+                <Icon size={20} aria-hidden="true" />
                 {label}
               </Link>
             ))}
           </nav>
 
-          <div className="app-sidebar-note">
-            <Leaf size={24} aria-hidden="true" />
-            <p>There’s no deadline for finding your footing.</p>
-          </div>
-
-          <div className="app-account">
-            <span className="app-account-label">Signed in as</span>
-            <span className="app-account-email">{user.email}</span>
-            <Link to="/onboarding">
-              <Settings size={16} aria-hidden="true" />
-              Edit name and goals
-            </Link>
-            <Link to="/sign-out">
-              <LogOut size={16} aria-hidden="true" />
-              Sign out of all devices
-            </Link>
-          </div>
+          <AccountLinks />
         </div>
       </aside>
 
       <div id="app-content" className="app-content" tabIndex={-1}>
         <Outlet />
       </div>
+
+      <nav className="app-bottom-navigation" aria-label="Your space pages">
+        {navigation.map(({ to, mobileLabel, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            aria-current={isCurrent(to) ? 'page' : undefined}
+          >
+            <Icon size={22} aria-hidden="true" />
+            <span>{mobileLabel}</span>
+          </Link>
+        ))}
+        <button
+          type="button"
+          aria-label="You: account options"
+          aria-haspopup="dialog"
+          aria-controls="app-account-dialog"
+          aria-expanded={accountOpen}
+          className={accountSelected || accountOpen ? 'app-you-current' : undefined}
+          onClick={openAccount}
+        >
+          <UserRound size={22} aria-hidden="true" />
+          <span>You</span>
+        </button>
+      </nav>
+
+      <dialog
+        ref={accountDialogRef}
+        id="app-account-dialog"
+        className="app-account-dialog"
+        aria-labelledby="app-account-title"
+        onClose={() => setAccountOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) closeAccount()
+        }}
+      >
+        <div className="app-account-sheet">
+          <header className="app-account-sheet-heading">
+            <h2 id="app-account-title">Your account</h2>
+            <button type="button" onClick={closeAccount} aria-label="Close account options" autoFocus>
+              <X size={22} aria-hidden="true" />
+            </button>
+          </header>
+          <AccountLinks onNavigate={closeAccount} />
+        </div>
+      </dialog>
     </div>
   )
 }

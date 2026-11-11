@@ -1,3 +1,5 @@
+import LoadingPlaceholder from './components/ui/LoadingPlaceholder'
+import Notice from './components/ui/Notice'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 
@@ -74,8 +76,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <main className="auth-state" role="status">
-        Checking your sign-in…
+      <main className="auth-state">
+        <LoadingPlaceholder label="Checking your sign-in…" />
       </main>
     )
   }
@@ -83,7 +85,7 @@ export default function App() {
   if (sessionError) {
     return (
       <main className="auth-state">
-        <p role="alert">{sessionError}</p>
+        <Notice variant="error">{sessionError}</Notice>
         <button
           type="button"
           className="button button--primary"
@@ -124,10 +126,10 @@ export default function App() {
   return (
     <>
       {redirectFailed && (
-        <p role="alert" className="auth-redirect-error">
+        <Notice variant="error">
           Google sign-in or email confirmation was not completed.
           Please open Log in and try again.
-        </p>
+        </Notice>
       )}
 
       <Routes>

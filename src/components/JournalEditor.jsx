@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useBlocker } from 'react-router'
 
 import Button from './ui/Button'
+import Card from './ui/Card'
+import Field from './ui/Field'
+import LeaveDialog from './ui/LeaveDialog'
+import Notice from './ui/Notice'
 import { deleteJournalEntry, saveJournalEntry } from '../services/journalService'
 import { validateJournalEntry } from '../utils/journalRequests'
 import '../styles/JournalEditor.css'
@@ -98,11 +102,11 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
         content: savedEntry.content,
         entryType: savedEntry.entry_type,
       }))
-      setSuccessMessage('Your writing is saved.')
+      setSuccessMessage('Saved. You can come back to this any time.')
       setCompleted({ entry: savedEntry })
     } catch {
       if (activeRef.current) {
-        setErrorMessage('We could not save your writing. Your draft is still here. Please try again.')
+        setErrorMessage('That didn’t save. What you wrote is still here, so try again.')
       }
     } finally {
       requestRef.current = false
@@ -138,12 +142,18 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
 
   return (
     <>
-      <form className="journal-editor" onSubmit={handleSubmit} aria-busy={Boolean(busy)}>
+      <Card as="form" className={`journal-editor${entryType === 'unsent_letter' ? ' journal-editor--letter' : ''}`} onSubmit={handleSubmit} aria-busy={Boolean(busy)}>
         <fieldset disabled={Boolean(busy)}>
-          <legend>{entryId ? 'Edit your writing' : 'A little room for your words'}</legend>
+          <legend className="writing-accessible-label">{entryId ? 'Edit your writing' : 'Write a new entry'}</legend>
+          <p className="writing-save-state" role="status">
+            {busy === 'save' ? 'Saving…' : hasUnsavedChanges ? 'Unsaved changes' : entryId ? 'All changes saved' : 'Not saved yet'}
+          </p>
 
-          <label htmlFor="entry-title">Title — optional</label>
-          <input
+          <Field
+            label="Title — optional"
+            className="journal-title-field"
+            controlClassName="journal-title-input"
+            placeholder="Untitled"
             id="entry-title"
             name="title"
             type="text"
@@ -154,8 +164,9 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
             }}
           />
 
-          <label htmlFor="entry-type">Type of writing</label>
-          <select
+          <Field
+            as="select"
+            label="Type of writing"
             id="entry-type"
             name="entryType"
             value={entryType}
@@ -166,16 +177,20 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
           >
             <option value="journal">Journal entry</option>
             <option value="unsent_letter">Unsent letter</option>
-          </select>
+          </Field>
 
           {entryType === 'unsent_letter' && (
             <p className="journal-editor-hint">
-              This letter stays in your journal. It will not be sent to anyone.
+              This stays here. It isn’t sent to anyone.
             </p>
           )}
 
-          <label htmlFor="entry-content">Your words</label>
-          <textarea
+          <Field
+            as="textarea"
+            label="Your words"
+            className="journal-body-field"
+            controlClassName="journal-body-input"
+            placeholder={entryType === 'unsent_letter' ? 'What would you like to say?' : 'Start wherever you are…'}
             id="entry-content"
             name="content"
             value={content}
@@ -189,53 +204,27 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
 
           <div className="journal-editor-actions">
             <Button type="submit">{busy === 'save' ? 'Saving…' : 'Save writing'}</Button>
-            <Button type="button" secondary onClick={onCancel}>Back to Journal</Button>
+            <Button type="button" secondary onClick={onCancel}>Cancel</Button>
 
             {entryId && (
-              <button type="button" className="journal-delete" onClick={handleDelete}>
+              <Button type="button" variant="danger" onClick={handleDelete}>
                 {busy === 'delete' ? 'Deleting…' : 'Delete entry'}
-              </button>
+              </Button>
             )}
           </div>
         </fieldset>
 
-        <p role="alert" className="journal-editor-error">{errorMessage}</p>
-        <p role="status" className="journal-editor-status">{successMessage}</p>
-        <p className="journal-editor-hint">
-          {hasUnsavedChanges ? 'You have unsaved changes.' : 'Changes are saved only when you choose Save writing.'}
-        </p>
-      </form>
+        <Notice variant="error" title="Couldn’t save">{errorMessage}</Notice>
+        <Notice variant="success">{successMessage}</Notice>
+      </Card>
 
-      <dialog
-        ref={dialogRef}
-        className="journal-leave-dialog"
-        aria-labelledby="leave-title"
-        aria-describedby="leave-description"
-        onCancel={(event) => {
-          event.preventDefault()
-          if (blocker.state === 'blocked') blocker.reset()
-        }}
-      >
-        <h2 id="leave-title">Keep your words?</h2>
-        <p id="leave-description">
-          {busy
-            ? 'Please wait for the current request to finish before leaving.'
-            : 'Your changes have not been saved. Stay to keep writing, or discard the changes and leave.'}
-        </p>
-        <div className="journal-editor-actions">
-          <Button type="button" onClick={() => blocker.state === 'blocked' && blocker.reset()}>
-            Stay here
-          </Button>
-          <Button
-            type="button"
-            secondary
-            disabled={Boolean(busy)}
-            onClick={() => blocker.state === 'blocked' && blocker.proceed()}
-          >
-            Discard and leave
-          </Button>
-        </div>
-      </dialog>
+      <LeaveDialog
+        dialogRef={dialogRef}
+        idPrefix="journal-leave"
+        busy={Boolean(busy)}
+        onStay={() => blocker.state === 'blocked' && blocker.reset()}
+        onLeave={() => blocker.state === 'blocked' && blocker.proceed()}
+      />
     </>
   )
 }

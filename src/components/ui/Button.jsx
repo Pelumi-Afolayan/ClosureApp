@@ -1,8 +1,17 @@
 import '../../styles/Button.css'
 
-export default function Button({ children, secondary = false, className = '', ...props }) {
+export default function Button({
+  children,
+  variant,
+  secondary = false,
+  className = '',
+  type,
+  ...props
+}) {
+  const appearance = variant || (secondary ? 'secondary' : 'primary')
+
   return (
-    <button className={`button ${secondary ? 'button--secondary' : 'button--primary'} ${className}`} {...props}>
+    <button type={type} className={`button button--${appearance} ${className}`} {...props}>
       {children}
     </button>
   )
