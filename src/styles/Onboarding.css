@@ -1,56 +1,19 @@
-.onboarding-page {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-  padding: var(--space-10) var(--space-6);
-}
-
 .onboarding-panel {
   width: 100%;
   max-width: 38rem;
-  padding: var(--space-10);
+  padding: var(--space-48);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
-.onboarding-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-8);
-  color: var(--sage-800);
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.onboarding-eyebrow {
-  margin-bottom: var(--space-3);
-  color: var(--sage-800);
-  font-size: var(--text-small);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-}
-
-.onboarding-panel h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-page-title);
-  line-height: 1.15;
-}
-
-.onboarding-description {
-  margin-top: var(--space-4);
-  color: var(--text-muted);
-  line-height: 1.7;
-}
-
 .onboarding-panel form {
-  margin-top: var(--space-8);
+  margin-top: var(--space-32);
 }
 
 .onboarding-name-label {
   display: block;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-8);
   font-size: var(--text-label);
   font-weight: 600;
 }
@@ -58,7 +21,7 @@
 .onboarding-name {
   width: 100%;
   min-height: 3rem;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-16) var(--space-16);
   border: 1px solid var(--border-field);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -66,7 +29,7 @@
 }
 
 .onboarding-goal-fieldset {
-  margin-top: var(--space-8);
+  margin-top: var(--space-32);
 }
 
 .onboarding-goal-fieldset legend {
@@ -74,7 +37,7 @@
 }
 
 .onboarding-hint {
-  margin-top: var(--space-2);
+  margin-top: var(--space-8);
   color: var(--text-muted);
   font-size: var(--text-label);
 }
@@ -83,14 +46,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
+  gap: var(--space-16);
+  margin-top: var(--space-16);
 }
 
 .onboarding-clear,
 .onboarding-signout {
   min-height: 2.75rem;
-  padding: var(--space-2);
+  padding: var(--space-8);
   border: 0;
   background: transparent;
   color: var(--sage-800);
@@ -101,16 +64,16 @@
 
 .onboarding-goals {
   display: grid;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
+  gap: var(--space-16);
+  margin-top: var(--space-24);
 }
 
 .onboarding-goal {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-16);
   min-height: 3.5rem;
-  padding: var(--space-4);
+  padding: var(--space-16);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -131,13 +94,13 @@
 }
 
 .onboarding-selection-count {
-  margin-top: var(--space-4);
+  margin-top: var(--space-16);
   color: var(--text-muted);
   font-size: var(--text-small);
 }
 
 .onboarding-error {
-  margin-top: var(--space-4);
+  margin-top: var(--space-16);
   color: var(--danger);
   font-size: var(--text-label);
   line-height: 1.6;
@@ -145,11 +108,11 @@
 
 .onboarding-submit {
   width: 100%;
-  margin-top: var(--space-6);
+  margin-top: var(--space-24);
 }
 
 .onboarding-account {
-  margin-top: var(--space-6);
+  margin-top: var(--space-24);
   color: var(--text-muted);
   font-size: var(--text-small);
   overflow-wrap: anywhere;
@@ -165,6 +128,6 @@
 
 @media (max-width: 480px) {
   .onboarding-panel {
-    padding: var(--space-6);
+    padding: var(--space-24);
   }
 }

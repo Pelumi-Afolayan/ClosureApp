@@ -11,9 +11,13 @@ const navigation = [
   { to: '/my-story', label: 'My Story', mobileLabel: 'My Story', icon: BookHeart },
 ]
 
-function AccountLinks({ onNavigate }) {
+// Letters remain accessible through Journal's filters on mobile.
+const mobileNavigation = navigation.filter(({ to }) => to !== '/journal?type=unsent_letter')
+
+function AccountLinks({ email, onNavigate }) {
   return (
     <div className="app-account">
+      {email && <p className="app-account-email">{email}</p>}
       <Link to="/onboarding" onClick={onNavigate}>
         <Settings size={16} aria-hidden="true" />
         Settings
@@ -26,7 +30,7 @@ function AccountLinks({ onNavigate }) {
   )
 }
 
-export default function AppLayout() {
+export default function AppLayout({ user }) {
   const location = useLocation()
   const accountDialogRef = useRef(null)
   const [accountOpen, setAccountOpen] = useState(false)
@@ -54,7 +58,8 @@ export default function AppLayout() {
     return () => desktop.removeEventListener('change', closeOnDesktop)
   }, [])
 
-  function isCurrent(to) {
+  function isCurrent(to, mobile = false) {
+    if (mobile && to === '/journal') return location.pathname.startsWith('/journal')
     if (to === '/journal' || to === '/journal?type=unsent_letter') {
       return location.pathname.startsWith('/journal') &&
         lettersSelected === to.includes('unsent_letter')
@@ -97,7 +102,7 @@ export default function AppLayout() {
             ))}
           </nav>
 
-          <AccountLinks />
+          <AccountLinks email={user?.email} />
         </div>
       </aside>
 
@@ -106,11 +111,11 @@ export default function AppLayout() {
       </div>
 
       <nav className="app-bottom-navigation" aria-label="Your space pages">
-        {navigation.map(({ to, mobileLabel, icon: Icon }) => (
+        {mobileNavigation.map(({ to, mobileLabel, icon: Icon }) => (
           <Link
             key={to}
             to={to}
-            aria-current={isCurrent(to) ? 'page' : undefined}
+            aria-current={isCurrent(to, true) ? 'page' : undefined}
           >
             <Icon size={22} aria-hidden="true" />
             <span>{mobileLabel}</span>
@@ -147,7 +152,7 @@ export default function AppLayout() {
               <X size={22} aria-hidden="true" />
             </button>
           </header>
-          <AccountLinks onNavigate={closeAccount} />
+          <AccountLinks email={user?.email} onNavigate={closeAccount} />
         </div>
       </dialog>
     </div>

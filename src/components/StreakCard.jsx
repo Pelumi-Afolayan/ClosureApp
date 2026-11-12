@@ -25,7 +25,7 @@ export default function StreakCard({ kind = 'app' }) {
         onClick={() => dialogRef.current?.showModal()}
       >
         <Icon size={20} aria-hidden="true" />
-        <span>{noContact ? 'No contact' : 'App'}{!tracker.loading && !tracker.error && tracker.current > 0 ? ` · ${count}` : ''}</span>
+        <span>{noContact ? 'No contact' : 'Check-in streak'}{!tracker.loading && !tracker.error ? `: ${count}` : ''}</span>
       </button>
       <dialog
         ref={dialogRef}

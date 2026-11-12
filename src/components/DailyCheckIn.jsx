@@ -175,8 +175,8 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
 
       {checkInDate && (
         <p className="check-in-date">
-          <time dateTime={checkInDate}>{checkInDate}</time>
-          {' · '}{timezone}
+          <time dateTime={checkInDate}>{new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${checkInDate}T12:00:00Z`))}</time>
+          <span className="check-in-timezone">{timezone}</span>
         </p>
       )}
 

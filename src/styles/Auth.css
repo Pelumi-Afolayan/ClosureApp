@@ -3,21 +3,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-6);
+  gap: var(--space-24);
   min-height: 100vh;
-  padding: var(--space-6);
+  padding: var(--space-24);
   text-align: center;
 }
 
 .auth-divider {
-  margin-top: var(--space-6);
+  margin-top: var(--space-24);
   color: var(--text-muted);
   font-size: var(--text-label);
   text-align: center;
 }
 
 .auth-message {
-  margin-top: var(--space-4);
+  margin-top: var(--space-16);
   color: var(--sage-800);
   font-size: var(--text-label);
   overflow-wrap: anywhere;
@@ -32,7 +32,7 @@
 }
 
 .auth-redirect-error {
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-16) var(--space-24);
   background: var(--danger-surface);
   color: var(--danger);
   text-align: center;
@@ -42,7 +42,7 @@
   background: var(--surface);
   border-color: var(--google-border);
   color: var(--google-ink);
-  gap: var(--space-3);
+  gap: var(--space-16);
 }
 
 .auth-google-icon {

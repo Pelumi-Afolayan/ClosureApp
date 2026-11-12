@@ -1,3 +1,5 @@
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useBlocker } from 'react-router'
@@ -277,12 +279,11 @@ export default function MyStory({ user, profile }) {
 
   return (
     <div className="story-page">
-      <main className="story-main">
-        <h1>My Story</h1>
-        <p className="story-introduction">
-          A place to reflect on what happened and what you need now.
-          Every question is optional. You can leave anything blank and return whenever you’re ready.
-        </p>
+      <PageShell width="narrow" className="story-main">
+        <PageHeader
+          title="My Story"
+          subtitle="A place to reflect on what happened and what you need now. Every question is optional."
+        />
 
         {loading ? (
           <LoadingPlaceholder label="Loading your story…" lines={5} />
@@ -316,7 +317,7 @@ export default function MyStory({ user, profile }) {
             )}
           </>
         )}
-      </main>
+      </PageShell>
     </div>
   )
 }

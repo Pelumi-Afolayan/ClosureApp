@@ -1,14 +1,14 @@
 .journal-editor.card {
   max-width: 40rem;
-  margin: var(--space-8) auto 0;
-  padding: var(--space-6) 0;
+  margin: var(--space-32) auto 0;
+  padding: var(--space-24) 0;
   border: 0;
   border-radius: 0;
   background: transparent;
 }
 
 .journal-editor.card.journal-editor--letter {
-  padding: var(--space-7);
+  padding: var(--space-32);
   border-radius: var(--radius-lg);
   background: var(--clay-100);
 }
@@ -31,11 +31,11 @@
 }
 
 .journal-title-field {
-  margin-top: var(--space-6);
+  margin-top: var(--space-24);
 }
 
 .journal-title-input.field-control {
-  padding: var(--space-3) 0;
+  padding: var(--space-16) 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -51,7 +51,7 @@
 
 .journal-body-input.field-control {
   min-height: 60vh;
-  padding: var(--space-4) 0;
+  padding: var(--space-16) 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -62,7 +62,7 @@
 }
 
 .journal-editor .field-control {
-  scroll-margin-block: var(--space-8) 12rem;
+  scroll-margin-block: var(--space-32) var(--space-48);
 }
 
 .journal-editor .field:has(select) {
@@ -73,9 +73,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
-  padding-block: var(--space-4);
+  gap: var(--space-16);
+  margin-top: var(--space-24);
+  padding-block: var(--space-16);
   border-top: 1px solid var(--border-soft);
   background: var(--paper);
 }
@@ -86,7 +86,7 @@
 
 .journal-editor-hint,
 .journal-editor-status {
-  margin-top: var(--space-4);
+  margin-top: var(--space-16);
   color: var(--text-muted);
   font-size: var(--text-small);
   line-height: 1.7;
@@ -105,6 +105,6 @@
   }
 
   .journal-editor.card.journal-editor--letter {
-    padding: var(--space-5);
+    padding: var(--space-24);
   }
 }

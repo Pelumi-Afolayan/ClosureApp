@@ -16,7 +16,7 @@ Open the local address printed by Vite. For a production build, run `npm run bui
 ## What we built, step by step
 
 1. Created the official Vite React JavaScript starter. Vite runs the development server and produces the production build. `src/main.jsx` mounts React; `src/App.jsx` displays the Welcome page.
-2. Installed `tailwindcss@4` and `@tailwindcss/vite@4`. `vite.config.js` connects the Tailwind plugin. `src/index.css` imports Tailwind and defines the cream, sage, charcoal, and font theme. No older Tailwind configuration or v3 directives are needed.
+2. Installed `tailwindcss@4` and `@tailwindcss/vite@4`. `vite.config.js` connects the Tailwind plugin. `src/styles/index.css` imports Tailwind and defines the cream, sage, charcoal, and font theme. No older Tailwind configuration or v3 directives are needed.
 3. Added `src/components/ui/Button.jsx` and `Card.jsx`. These keep shared styling consistent. Input and Modal components can be introduced when a screen needs them.
 4. Built `src/pages/Welcome.jsx`. It contains the responsive Welcome layout, sample encouragement, mood preview, and explanations for the future account actions. The sample mood lives in React state and resets on refresh.
 
@@ -44,3 +44,16 @@ Verified during creation: production build passed; local page returned HTTP 200;
 No accounts, database, private storage, streak calculation, installation, or offline support are implemented in this milestone. Do not enter sensitive writing in a future demo until privacy has been implemented and verified.
 
 The original handoff is preserved in `PROJECT-SPEC.txt`.
+
+## Styling update — separate CSS files
+
+The app now uses ordinary CSS rather than Tailwind utility classes. This supersedes the Tailwind styling instructions above.
+
+- `src/styles/Welcome.css` styles the Welcome screen, including mobile and desktop layouts.
+- `src/styles/Button.css` styles shared buttons.
+- `src/styles/Card.css` styles shared cards.
+- `src/styles/index.css` defines shared CSS variables, fonts, browser defaults, keyboard focus and reduced-motion behaviour.
+- Each component imports its own stylesheet. The Vite config no longer uses the Tailwind plugin. Previously installed Tailwind packages are inactive.
+- The BrowserRouter setup added in `main.jsx` is preserved.
+
+Verification: production build passed after conversion. Browser automation was blocked, so visual comparison and mobile checks need to be completed manually. Check the Welcome layout, select/deselect a sample mood, and resize the browser.

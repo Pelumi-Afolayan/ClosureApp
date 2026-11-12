@@ -1,3 +1,5 @@
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import Notice from '../components/ui/Notice'
 import { useEffect, useState } from 'react'
@@ -55,22 +57,19 @@ export default function Journal({ user, profile }) {
 
   return (
     <div className={`journal-page${entryType === 'unsent_letter' ? ' journal-page--letters' : ''}`}>
-      <main className="journal-main" id="journal-main">
-        <div className="journal-title-row">
-          <div>
-            <h1 className="journal-page-title">{entryType === 'unsent_letter' ? 'Unsent Letters' : 'Journal'}</h1>
-            <p className="journal-description">
-              {entryType === 'unsent_letter'
-                ? 'Say what you need to say. These letters are saved here, never sent.'
-                : 'Write freely. Come back to your words whenever you need to.'}
-            </p>
-          </div>
-
-          <Link to={newEntryUrl} className="button button--primary">
-            <Plus size={18} aria-hidden="true" />
-            {entryType === 'unsent_letter' ? 'Write a letter' : 'New entry'}
-          </Link>
-        </div>
+      <PageShell className="journal-main" id="journal-main">
+        <PageHeader
+          title={entryType === 'unsent_letter' ? 'Unsent Letters' : 'Journal'}
+          subtitle={entryType === 'unsent_letter'
+            ? 'Say what you need to say. These letters are saved here, never sent.'
+            : 'Write freely. Come back to your words whenever you need to.'}
+          actions={(
+            <Link to={newEntryUrl} className="button button--primary">
+              <Plus size={18} aria-hidden="true" />
+              {entryType === 'unsent_letter' ? 'Write a letter' : 'New entry'}
+            </Link>
+          )}
+        />
 
         <nav className="journal-filters" aria-label="Filter writing">
           <Chip as={Link} to="/journal" selected={entryType === 'all'}>All writing</Chip>
@@ -117,7 +116,7 @@ export default function Journal({ user, profile }) {
             {result.hasMore && <Link to={pageUrl(page + 1)} className="button button--secondary">Next</Link>}
           </nav>
         )}
-      </main>
+      </PageShell>
     </div>
   )
 }

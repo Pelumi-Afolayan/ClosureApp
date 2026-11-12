@@ -1,0 +1,95 @@
+.today-encouragement {
+  position: relative;
+}
+
+.encouragement-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.encouragement-open:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -8px;
+}
+
+.encouragement-dialog {
+  width: min(48rem, calc(100% - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: #fff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.encouragement-dialog::backdrop {
+  background: rgb(0 0 0 / 75%);
+}
+
+.encouragement-expanded {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: min(38rem, 75dvh);
+  padding: var(--space-48);
+  padding-top: 6rem;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 90%)), url('/images/encouragement-landscape.png') center / cover;
+}
+
+.encouragement-close {
+  position: absolute;
+  top: var(--space-16);
+  right: var(--space-16);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 65%);
+  color: #fff;
+}
+
+.encouragement-close:hover {
+  background: #000;
+}
+
+.encouragement-expanded .today-card-eyebrow {
+  font-weight: 400;
+}
+
+.encouragement-expanded h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.encouragement-expanded-note {
+  margin-top: var(--space-24);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 540px) {
+  .encouragement-expanded {
+    padding: 6rem var(--space-24) var(--space-32);
+  }
+}

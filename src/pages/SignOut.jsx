@@ -1,3 +1,5 @@
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
@@ -27,14 +29,18 @@ export default function SignOut() {
   }
 
   return (
-    <main className="journal-main app-sign-out">
-      <h1>Ready to sign out?</h1>
-      <p>Your saved writing will be here when you return.</p>
-      <Button disabled={busy} onClick={handleSignOut}>
-        {busy ? 'Signing out…' : 'Sign out of all devices'}
-      </Button>
-      <Link to="/today">Stay in my space</Link>
-      {error && <Notice variant="error">{error}</Notice>}
-    </main>
+    <PageShell width="narrow" className="sign-out-page">
+      <PageHeader
+        title="Ready to sign out?"
+        subtitle="Your saved writing will be here when you return."
+      />
+      <div className="sign-out-actions">
+        <Button disabled={busy} onClick={handleSignOut}>
+          {busy ? 'Signing out…' : 'Sign out of all devices'}
+        </Button>
+        <Link to="/today">Stay in my space</Link>
+        {error && <Notice variant="error">{error}</Notice>}
+      </div>
+    </PageShell>
   )
 }

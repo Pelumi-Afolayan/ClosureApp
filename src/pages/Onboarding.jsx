@@ -1,7 +1,9 @@
+import NotificationSettings from '../components/NotificationSettings'
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 import Notice from '../components/ui/Notice'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Check, Leaf } from 'lucide-react'
 
 import Button from '../components/ui/Button'
 import { goals } from '../data/goals'
@@ -81,22 +83,13 @@ export default function Onboarding({ user, profile, onComplete }) {
   }
 
   return (
-    <main className="onboarding-page">
+    <PageShell width="narrow" className="onboarding-page">
+      <PageHeader
+        titleId="onboarding-title"
+        title="Let’s make this space yours."
+        subtitle="Choose what matters to you. You can work towards more than one thing, and change your choices later."
+      />
       <section className="onboarding-panel" aria-labelledby="onboarding-title">
-        <div className="onboarding-brand">
-          <Leaf size={24} aria-hidden="true" />
-          closure.
-        </div>
-
-        <p className="onboarding-eyebrow">YOUR SPACE, YOUR PACE</p>
-
-        <h1 id="onboarding-title">Let’s make this space yours.</h1>
-
-        <p className="onboarding-description">
-          Choose what matters to you. You can work towards more than one thing,
-          and change your choices later.
-        </p>
-
         <form onSubmit={handleSubmit} aria-busy={saving}>
           <label className="onboarding-name-label" htmlFor="preferred-name">
             What should we call you?
@@ -148,7 +141,6 @@ export default function Onboarding({ user, profile, onComplete }) {
                   />
 
                   <span>{goal.label}</span>
-                  {selectedGoals.includes(goal.id) && <Check size={18} aria-hidden="true" />}
                 </label>
               ))}
             </div>
@@ -178,6 +170,7 @@ export default function Onboarding({ user, profile, onComplete }) {
           {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
       </section>
-    </main>
+      {profile?.onboarding_complete && <NotificationSettings userId={user.id} timezone={profile.timezone} />}
+    </PageShell>
   )
 }

@@ -98,7 +98,7 @@ export default function SignedInApp({ user }) {
     <Routes>
       <Route element={profile?.onboarding_complete ? (
         <ActivityProvider key={`${user.id}:${profile.timezone}`} userId={user.id} timezone={profile.timezone}>
-          <AppLayout />
+          <AppLayout user={user} />
         </ActivityProvider>
       ) : undefined}>
         <Route

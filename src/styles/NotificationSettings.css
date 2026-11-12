@@ -1,0 +1,6 @@
+ .notification-settings { display: grid; gap: var(--space-16); margin-top: var(--space-48); padding: var(--space-24); }
+.notification-settings h2 { font-size: 1.75rem; }
+.notification-settings p { margin: 0; line-height: 1.7; }
+.notification-settings input { width: fit-content; min-height: 44px; padding: var(--space-8) var(--space-16); border: 1px solid var(--border-field); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; }
+.reminder-small { color: var(--text-muted); font-size: var(--text-small); }
+.reminder-actions { display: flex; flex-wrap: wrap; gap: var(--space-16); align-items: center; }

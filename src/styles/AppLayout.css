@@ -13,7 +13,7 @@
   flex-direction: column;
   height: 100dvh;
   overflow-y: auto;
-  padding: var(--space-8) var(--space-5);
+  padding: var(--space-32) var(--space-24);
   border-right: 1px solid var(--border-soft);
   background: var(--paper);
 }
@@ -21,7 +21,7 @@
 .app-brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-8);
   width: fit-content;
   color: var(--sage-800);
   font-size: 1.625rem;
@@ -33,11 +33,11 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-16);
 }
 
 .app-sidebar-label {
-  margin-top: var(--space-8);
+  margin-top: var(--space-32);
   color: var(--text-muted);
   font-size: var(--text-small);
   font-weight: 600;
@@ -45,16 +45,16 @@
 
 .app-navigation {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-8);
 }
 
 .app-navigation a,
 .app-account a {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-16);
   min-height: 2.75rem;
-  padding: var(--space-3);
+  padding: var(--space-16);
   border-radius: var(--radius-md);
   color: var(--sage-800);
   font-size: var(--text-label);
@@ -80,9 +80,9 @@
 
 .app-account {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-8);
   margin-top: auto;
-  padding-top: var(--space-4);
+  padding-top: var(--space-16);
   border-top: 1px solid var(--border-soft);
 }
 
@@ -97,7 +97,7 @@
 .app-sign-out {
   display: grid;
   justify-items: start;
-  gap: var(--space-6);
+  gap: var(--space-24);
 }
 
 .app-bottom-navigation {
@@ -125,21 +125,22 @@
 }
 
 .app-account-sheet {
-  padding: var(--space-6);
-  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-24);
+  padding-bottom: calc(var(--space-24) + env(safe-area-inset-bottom, 0px));
 }
 
 .app-account-sheet-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
 }
 
 .app-account-sheet-heading h2 {
   font-size: var(--text-card-heading);
-  font-weight: 600;
+  font-weight: 400;
+  font-family: var(--font-heading);
 }
 
 .app-account-sheet-heading button {
@@ -162,11 +163,11 @@
   }
 
   .app-content {
-    padding-bottom: calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-4));
+    padding-bottom: calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-16));
   }
 
   .app-content :is(a, button, input, textarea, select, [tabindex]) {
-    scroll-margin-block: var(--space-6) calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-6));
+    scroll-margin-block: var(--space-24) calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-24));
   }
 
   .app-bottom-navigation {
@@ -174,9 +175,10 @@
     inset: auto 0 0;
     z-index: 5;
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-8);
     min-height: var(--bottom-navigation-height);
-    padding: var(--space-2) env(safe-area-inset-right, 0px) calc(var(--space-2) + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 0px);
+    padding: var(--space-8) max(var(--space-8), env(safe-area-inset-right, 0px)) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)) max(var(--space-8), env(safe-area-inset-left, 0px));
     border-top: 1px solid var(--border-soft);
     background: var(--surface);
   }
@@ -187,15 +189,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-1);
+    gap: var(--space-8);
     min-width: 0;
     min-height: 3.75rem;
-    padding: var(--space-2) 0;
+    padding: var(--space-8) 0;
     border: 0;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: transparent;
     color: var(--text-muted);
     font-size: var(--text-small);
+    line-height: 1.3;
     text-align: center;
   }
 
@@ -206,10 +209,17 @@
   }
 
   .app-bottom-navigation a[aria-current="page"],
-  .app-bottom-navigation .app-you-current {
+  .app-bottom-navigation a[aria-current="page"]:hover,
+  .app-bottom-navigation .app-you-current,
+  .app-bottom-navigation .app-you-current:hover {
     background: var(--sage-100);
     color: var(--sage-800);
     font-weight: 600;
+  }
+
+  .app-bottom-navigation a[aria-current="page"] svg,
+  .app-bottom-navigation .app-you-current svg {
+    stroke-width: 2.5;
   }
 
   .app-bottom-navigation :focus-visible {

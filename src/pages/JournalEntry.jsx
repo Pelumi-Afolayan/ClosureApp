@@ -1,3 +1,5 @@
+import PageHeader from '../components/PageHeader'
+import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import Notice from '../components/ui/Notice'
 import { useCallback, useEffect, useState } from 'react'
@@ -58,9 +60,11 @@ export default function JournalEntry({ user, profile }) {
 
   return (
     <div className="journal-page">
-      <main className="journal-main journal-editor-page">
-        <h1 className="journal-page-title">{entry?.entry_type === 'unsent_letter' ? 'Unsent letter' : entryId ? 'Journal entry' : 'New entry'}</h1>
-        <p className="journal-description">No perfect words needed. Save whenever you’re ready.</p>
+      <PageShell width="narrow" className="journal-main journal-editor-page">
+        <PageHeader
+          title={entry?.entry_type === 'unsent_letter' ? 'Unsent letter' : entryId ? 'Journal entry' : 'New entry'}
+          subtitle="No perfect words needed. Save whenever you’re ready."
+        />
 
         {loading ? (
           <LoadingPlaceholder label="Loading your entry…" lines={5} />
@@ -77,24 +81,22 @@ export default function JournalEntry({ user, profile }) {
           </div>
         ) : (
           <>
-            {entryId && location.state?.saved && <p role="status" className="journal-editor-status">Saved. You can come back to this any time.</p>}
-            {entryId && (
-              <p className="journal-entry-dates">
-                Created {formatJournalDate(entry.created_at, profile.timezone)}
-                {' · '}Last edited {formatJournalDate(entry.updated_at, profile.timezone)}
-              </p>
-            )}
+            {entryId && location.state?.saved && <p role="status" className="writing-accessible-label">Saved. You can come back to this any time.</p>}
             <JournalEditor
               key={entryId || `new:${initialType}`}
               userId={user.id}
               entry={entry}
+              metadata={entryId ? (
+                <>Created {formatJournalDate(entry.created_at, profile.timezone)}
+                  {' · '}Last edited {formatJournalDate(entry.updated_at, profile.timezone)}</>
+              ) : null}
               onSaved={handleSaved}
               onCancel={returnToJournal}
               onDeleted={returnToJournal}
             />
           </>
         )}
-      </main>
+      </PageShell>
     </div>
   )
 }

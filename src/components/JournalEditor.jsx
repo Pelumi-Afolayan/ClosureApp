@@ -10,7 +10,7 @@ import { deleteJournalEntry, saveJournalEntry } from '../services/journalService
 import { validateJournalEntry } from '../utils/journalRequests'
 import '../styles/JournalEditor.css'
 
-export default function JournalEditor({ userId, entry, onSaved, onCancel, onDeleted }) {
+export default function JournalEditor({ userId, entry, metadata, onSaved, onCancel, onDeleted }) {
   const initialValues = {
     title: entry?.title || '',
     content: entry?.content || '',
@@ -145,45 +145,46 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
       <Card as="form" className={`journal-editor${entryType === 'unsent_letter' ? ' journal-editor--letter' : ''}`} onSubmit={handleSubmit} aria-busy={Boolean(busy)}>
         <fieldset disabled={Boolean(busy)}>
           <legend className="writing-accessible-label">{entryId ? 'Edit your writing' : 'Write a new entry'}</legend>
-          <p className="writing-save-state" role="status">
-            {busy === 'save' ? 'Saving…' : hasUnsavedChanges ? 'Unsaved changes' : entryId ? 'All changes saved' : 'Not saved yet'}
-          </p>
 
-          <Field
-            label="Title — optional"
-            className="journal-title-field"
-            controlClassName="journal-title-input"
-            placeholder="Untitled"
-            id="entry-title"
-            name="title"
-            type="text"
-            value={title}
-            onChange={(event) => {
-              setTitle(event.target.value)
-              setSuccessMessage('')
-            }}
-          />
-
-          <Field
-            as="select"
-            label="Type of writing"
-            id="entry-type"
-            name="entryType"
-            value={entryType}
-            onChange={(event) => {
-              setEntryType(event.target.value)
-              setSuccessMessage('')
-            }}
-          >
-            <option value="journal">Journal entry</option>
-            <option value="unsent_letter">Unsent letter</option>
-          </Field>
 
           {entryType === 'unsent_letter' && (
             <p className="journal-editor-hint">
               This stays here. It isn’t sent to anyone.
             </p>
           )}
+
+          <div className="journal-editor-title-row">
+            <Field
+              label="Title — optional"
+              className="journal-title-field"
+              controlClassName="journal-title-input"
+              placeholder="Untitled"
+              id="entry-title"
+              name="title"
+              type="text"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setSuccessMessage('')
+              }}
+            />
+
+            <Field
+              as="select"
+              className="journal-type-field"
+              label="Type of writing"
+              id="entry-type"
+              name="entryType"
+              value={entryType}
+              onChange={(event) => {
+                setEntryType(event.target.value)
+                setSuccessMessage('')
+              }}
+            >
+              <option value="journal">Journal entry</option>
+              <option value="unsent_letter">Unsent letter</option>
+            </Field>
+          </div>
 
           <Field
             as="textarea"
@@ -203,12 +204,19 @@ export default function JournalEditor({ userId, entry, onSaved, onCancel, onDele
           />
 
           <div className="journal-editor-actions">
-            <Button type="submit">{busy === 'save' ? 'Saving…' : 'Save writing'}</Button>
-            <Button type="button" secondary onClick={onCancel}>Cancel</Button>
+            <Button type="submit">{busy === 'save' ? 'Saving…' : 'Save'}</Button>
+            <Button type="button" variant="quiet" onClick={onCancel}>Cancel</Button>
+
+            <div className="journal-save-details">
+              {metadata && <p className="journal-entry-dates">{metadata}</p>}
+              <p className="writing-save-state" role="status">
+                {busy === 'save' ? 'Saving…' : hasUnsavedChanges ? 'Unsaved changes' : entryId ? 'All changes saved' : 'Not saved yet'}
+              </p>
+            </div>
 
             {entryId && (
-              <Button type="button" variant="danger" onClick={handleDelete}>
-                {busy === 'delete' ? 'Deleting…' : 'Delete entry'}
+              <Button type="button" variant="quiet" className="journal-delete-text" onClick={handleDelete}>
+                {busy === 'delete' ? 'Deleting…' : 'Delete'}
               </Button>
             )}
           </div>

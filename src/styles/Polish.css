@@ -1,0 +1,150 @@
+/* Today: compact photo, readable copy and a single aligned goals row. */
+.today-encouragement {
+  min-height: 0;
+  padding: var(--space-24);
+  background-image: linear-gradient(180deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 90%)), url('/images/encouragement-landscape.png');
+}
+
+.today-encouragement .today-card-eyebrow {
+  margin-bottom: var(--space-16);
+  font-weight: 400;
+}
+
+.today-encouragement h2 {
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  line-height: 1.3;
+}
+
+.today-encouragement-copy > p:last-child {
+  margin-top: var(--space-24);
+  color: #fff;
+  line-height: 1.6;
+}
+
+.today-feelings {
+  width: 100%;
+  max-width: 44rem;
+}
+
+.check-in-timezone {
+  display: block;
+  margin-top: var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.today-feelings .check-in-note-input {
+  width: 100%;
+  min-height: 0;
+  height: auto;
+}
+
+.today-goals-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.today-goals-row .today-saved-goals {
+  grid-column: 2;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.today-goals-row .today-saved-goals li {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.today-goals-row .today-edit-goals {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.app-navigation {
+  gap: 4px;
+}
+
+.app-navigation a {
+  height: 44px;
+  min-height: 44px;
+  padding: var(--space-8) var(--space-16);
+  line-height: 1.3;
+}
+
+.app-account-email {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+
+/* Editor: a compact title row and one save toolbar below the writing. */
+.journal-editor-title-row {
+  align-items: center;
+  margin-top: 0;
+}
+
+.journal-type-field .field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.journal-editor .journal-type-field .field-control {
+  min-height: 44px;
+  border-radius: var(--radius-pill);
+}
+
+.journal-editor .journal-body-input {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.75;
+  resize: none;
+  field-sizing: content;
+}
+
+.journal-save-details {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-16);
+  min-width: 0;
+}
+
+.journal-save-details .journal-entry-dates,
+.journal-save-details .writing-save-state {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: 1.6;
+}
+
+.journal-editor-actions .journal-delete-text,
+.journal-editor-actions .journal-delete-text:hover {
+  margin-left: auto;
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--danger);
+}
+
+.journal-editor-actions .journal-delete-text:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1101px) {
+  .today-encouragement {
+    min-height: 17.5rem;
+  }
+}
