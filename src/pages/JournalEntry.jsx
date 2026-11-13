@@ -54,6 +54,14 @@ export default function JournalEntry({ user, profile }) {
     }
   }, [entryId, navigate, key])
 
+  const handleDeleted = useCallback((result) => {
+    if (result?.released) {
+      navigate('/journal?type=unsent_letter', { replace: true, state: { letterReleased: true } })
+    } else {
+      navigate('/journal')
+    }
+  }, [navigate])
+
   const returnToJournal = useCallback(() => navigate('/journal'), [navigate])
 
   const entry = entryId ? result?.entry : { entry_type: initialType }
@@ -85,6 +93,7 @@ export default function JournalEntry({ user, profile }) {
             <JournalEditor
               key={entryId || `new:${initialType}`}
               userId={user.id}
+              selectedGoals={profile.goals}
               entry={entry}
               metadata={entryId ? (
                 <>Created {formatJournalDate(entry.created_at, profile.timezone)}
@@ -92,7 +101,7 @@ export default function JournalEntry({ user, profile }) {
               ) : null}
               onSaved={handleSaved}
               onCancel={returnToJournal}
-              onDeleted={returnToJournal}
+              onDeleted={handleDeleted}
             />
           </>
         )}

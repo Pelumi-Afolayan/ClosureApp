@@ -1,7 +1,8 @@
+import SupportButton from '../components/SupportButton'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
-import { Link } from 'react-router'
-import { BookHeart, BookOpen, ChevronRight, PenLine } from 'lucide-react'
+import { Link, useOutletContext } from 'react-router'
+import { BookHeart, BookOpen, CalendarDays, ChevronRight, PenLine } from 'lucide-react'
 
 import { goals } from '../data/goals'
 import DailyCheckIn from '../components/DailyCheckIn'
@@ -18,6 +19,7 @@ const writingLinks = [
 ]
 
 export default function Today({ user, profile }) {
+  const { openSupport } = useOutletContext()
   const preferredName = profile?.preferred_name || ''
   const selectedGoalLabels = goals.filter((goal) => profile?.goals?.includes(goal.id))
 
@@ -56,21 +58,36 @@ export default function Today({ user, profile }) {
         timezone={profile.timezone}
       />
 
+      <Link to="/mood" className="today-mood-history-link">
+        <CalendarDays size={20} aria-hidden="true" />
+        <span>Mood history<span className="today-mood-history-hint">Read your past check-ins, in your own time.</span></span>
+        <ChevronRight size={18} aria-hidden="true" />
+      </Link>
+
       <section className="today-writing" aria-labelledby="writing-title">
         <h2 id="writing-title">A place to put it into words</h2>
         <div className="today-writing-grid">
           {writingLinks.map(({ to, title, description, icon: Icon }) => (
-            <Link key={to} to={to} className="today-writing-item">
-              <Icon size={23} aria-hidden="true" />
-              <div>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </div>
-              <ChevronRight size={18} aria-hidden="true" />
-            </Link>
+            <div key={to} className="today-writing-tile">
+              <Link to={to} className="today-writing-item">
+                <Icon size={23} aria-hidden="true" />
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+                <ChevronRight size={18} aria-hidden="true" />
+              </Link>
+              {to === '/my-story' && (
+                <Link to="/my-story?section=learning" className="today-learning-link">
+                  What I'm learning
+                  <ChevronRight size={16} aria-hidden="true" />
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </section>
+      <SupportButton className="support-today-float" onClick={openSupport} />
     </PageShell>
   )
 }

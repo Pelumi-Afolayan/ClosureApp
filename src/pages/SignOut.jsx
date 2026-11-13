@@ -4,9 +4,9 @@ import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import Button from '../components/ui/Button'
-import { supabase } from '../lib/supabase'
+import { signOutWithReminderCleanup } from '../services/notificationService'
 
-export default function SignOut() {
+export default function SignOut({ userId }) {
   const busyRef = useRef(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -18,7 +18,7 @@ export default function SignOut() {
     setError('')
 
     try {
-      const { error: signOutError } = await supabase.auth.signOut({ scope: 'global' })
+      const { error: signOutError } = await signOutWithReminderCleanup(userId, { scope: 'global' })
       if (signOutError) throw signOutError
     } catch {
       setError('Could not sign out. Please check your connection and try again.')

@@ -1,6 +1,7 @@
+import SupportButton from './SupportButton'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { BookHeart, BookOpen, Leaf, LogOut, PenLine, Settings, ShieldCheck, Sun, UserRound, X } from 'lucide-react'
+import { BookHeart, BookOpen, CalendarDays, Leaf, LogOut, PenLine, Settings, ShieldCheck, Sun, UserRound, X } from 'lucide-react'
 import '../styles/AppLayout.css'
 
 const navigation = [
@@ -14,10 +15,20 @@ const navigation = [
 // Letters remain accessible through Journal's filters on mobile.
 const mobileNavigation = navigation.filter(({ to }) => to !== '/journal?type=unsent_letter')
 
-function AccountLinks({ email, onNavigate }) {
+function AccountLinks({ email, onNavigate, onSupport }) {
+  const { pathname } = useLocation()
+
   return (
     <div className="app-account">
       {email && <p className="app-account-email">{email}</p>}
+      <div className="app-reflection-links">
+        <p className="app-reflection-label">Reflections</p>
+        <Link to="/mood" onClick={onNavigate} aria-current={pathname === '/mood' ? 'page' : undefined}>
+          <CalendarDays size={18} aria-hidden="true" />
+          Mood history
+        </Link>
+      </div>
+      <SupportButton onClick={onSupport} />
       <Link to="/onboarding" onClick={onNavigate}>
         <Settings size={16} aria-hidden="true" />
         Settings
@@ -30,12 +41,12 @@ function AccountLinks({ email, onNavigate }) {
   )
 }
 
-export default function AppLayout({ user }) {
+export default function AppLayout({ user, onSupport }) {
   const location = useLocation()
   const accountDialogRef = useRef(null)
   const [accountOpen, setAccountOpen] = useState(false)
   const lettersSelected = new URLSearchParams(location.search).get('type') === 'unsent_letter'
-  const accountSelected = ['/onboarding', '/sign-out'].includes(location.pathname)
+  const accountSelected = ['/onboarding', '/sign-out', '/mood'].includes(location.pathname)
 
   useEffect(() => {
     accountDialogRef.current?.close()
@@ -77,6 +88,12 @@ export default function AppLayout({ user }) {
     setAccountOpen(true)
   }
 
+  // Keep the activity/session providers mounted while giving the pause flow
+  // the whole screen, without hidden navigation behind it.
+  if (location.pathname === '/no-contact/urge') {
+    return <Outlet context={{ openSupport: onSupport }} />
+  }
+
   return (
     <div className="app-layout">
       <a className="skip-link" href="#app-content">Skip to content</a>
@@ -102,12 +119,12 @@ export default function AppLayout({ user }) {
             ))}
           </nav>
 
-          <AccountLinks email={user?.email} />
+          <AccountLinks email={user?.email} onSupport={onSupport} />
         </div>
       </aside>
 
       <div id="app-content" className="app-content" tabIndex={-1}>
-        <Outlet />
+        <Outlet context={{ openSupport: onSupport }} />
       </div>
 
       <nav className="app-bottom-navigation" aria-label="Your space pages">
@@ -152,7 +169,7 @@ export default function AppLayout({ user }) {
               <X size={22} aria-hidden="true" />
             </button>
           </header>
-          <AccountLinks email={user?.email} onNavigate={closeAccount} />
+          <AccountLinks email={user?.email} onNavigate={closeAccount} onSupport={() => { closeAccount(); onSupport() }} />
         </div>
       </dialog>
     </div>

@@ -1,8 +1,9 @@
+import Reflections from '../components/Reflections'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useBlocker } from 'react-router'
+import { Link, useBlocker, useSearchParams } from 'react-router'
 
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -232,7 +233,7 @@ function StoryReader({ story, timezone, onEdit }) {
   )
 }
 
-export default function MyStory({ user, profile }) {
+function StoryContent({ user, profile, navigation }) {
   const [result, setResult] = useState(null)
   const [attempt, setAttempt] = useState(0)
   const [editing, setEditing] = useState(false)
@@ -285,6 +286,8 @@ export default function MyStory({ user, profile }) {
           subtitle="A place to reflect on what happened and what you need now. Every question is optional."
         />
 
+        {navigation}
+
         {loading ? (
           <LoadingPlaceholder label="Loading your story…" lines={5} />
         ) : result.error ? (
@@ -319,5 +322,26 @@ export default function MyStory({ user, profile }) {
         )}
       </PageShell>
     </div>
+  )
+}
+
+export default function MyStory({ user, profile }) {
+  const [params] = useSearchParams()
+  const learning = params.get('section') === 'learning'
+  const navigation = (
+    <nav className="story-sections" aria-label="Story sections">
+      <Link to="/my-story" aria-current={!learning ? 'page' : undefined}>My story</Link>
+      <Link to="/my-story?section=learning" aria-current={learning ? 'page' : undefined}>What I'm learning</Link>
+    </nav>
+  )
+
+  if (!learning) return <StoryContent user={user} profile={profile} navigation={navigation} />
+
+  return (
+    <PageShell width="narrow">
+      <PageHeader title="What I'm learning" subtitle="A little space for growth, at your own pace." />
+      {navigation}
+      <Reflections key={user.id} userId={user.id} />
+    </PageShell>
   )
 }

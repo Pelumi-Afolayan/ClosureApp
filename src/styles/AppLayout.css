@@ -226,3 +226,15 @@
     outline-offset: -3px;
   }
 }
+
+.app-reflection-label {
+  margin: var(--space-8) 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.app-reflection-links a[aria-current="page"] {
+  background: var(--sage-100);
+  color: var(--sage-800);
+}

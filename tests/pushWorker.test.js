@@ -9,7 +9,7 @@ async function worker() {
   const opened = []
   const self = {
     location: { origin: 'https://closuree.vercel.app' },
-    registration: { showNotification: async (...args) => shown.push(args) },
+    registration: { pushManager: { getSubscription: async () => ({}) }, showNotification: async (...args) => shown.push(args) },
     clients: { matchAll: async () => [], openWindow: async (url) => opened.push(url) },
     addEventListener: (name, callback) => { handlers[name] = callback },
   }
@@ -42,4 +42,32 @@ test('notification clicks open only the app route or focus an existing app windo
   assert.equal(focused, true)
   assert.equal(opened.length, 1)
   assert.equal(closed, 2)
+})
+
+test('a queued push is ignored once this device has unsubscribed', async () => {
+  const { handlers, shown, self } = await worker()
+  self.registration.pushManager.getSubscription = async () => null
+  let pending
+  handlers.push({ waitUntil: (promise) => { pending = promise } })
+  await pending
+  assert.equal(shown.length, 0)
+})
+
+test('subscription changes retire subscriptions and notify app windows without keys or account data', async () => {
+  const { handlers, self } = await worker()
+  const messages = []
+  let removed = 0
+  self.clients.matchAll = async () => [
+    { url: 'https://closuree.vercel.app/onboarding', postMessage: (message) => messages.push(message) },
+    { url: 'https://other.test/', postMessage: () => assert.fail('must not message other origins') },
+  ]
+  let pending
+  handlers.pushsubscriptionchange({
+    oldSubscription: { unsubscribe: async () => { removed++ } },
+    newSubscription: { unsubscribe: async () => { removed++ } },
+    waitUntil: (promise) => { pending = promise },
+  })
+  await pending
+  assert.equal(removed, 2)
+  assert.equal(JSON.stringify(messages), '[{"type":"CLOSURE_PUSH_SUBSCRIPTION_CHANGED"}]')
 })

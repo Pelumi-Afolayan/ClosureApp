@@ -1,0 +1,198 @@
+.mood-periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-bottom: var(--space-24);
+}
+
+.mood-periods .button {
+  min-width: 5rem;
+}
+
+.mood-summary {
+  display: grid;
+  gap: var(--space-16);
+  padding: var(--space-24);
+}
+
+.mood-summary p {
+  margin: 0;
+}
+
+.mood-summary-text {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+.mood-comparison,
+.mood-date-range,
+.mood-help {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.mood-days {
+  margin-top: var(--space-48);
+}
+
+.mood-days h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-card-heading);
+  font-weight: 400;
+}
+
+.mood-date-range,
+.mood-help {
+  margin-top: var(--space-16);
+  overflow-wrap: anywhere;
+}
+
+.mood-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin: var(--space-24) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mood-day {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--space-8);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--text-small);
+}
+
+.mood-day--heavier {
+  background: var(--clay-100);
+  color: var(--clay-600);
+}
+
+.mood-day--lighter {
+  background: var(--sage-100);
+  color: var(--sage-800);
+}
+
+.mood-day--mixed,
+.mood-day--neutral {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.mood-day--blank {
+  background: var(--paper);
+  color: var(--text-muted);
+}
+
+.mood-day-mark {
+  min-height: 1.5em;
+}
+
+.mood-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16) var(--space-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.mood-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.mood-swatch {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.mood-day-dialog {
+  width: min(40rem, calc(100% - 2rem));
+  max-height: 85dvh;
+  margin: auto;
+  padding: var(--space-24);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+  overflow-y: auto;
+}
+
+.mood-day-dialog::backdrop {
+  background: var(--backdrop);
+}
+
+.mood-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+.mood-dialog-heading h2 {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-card-heading);
+  font-weight: 400;
+}
+
+.mood-dialog-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--sage-800);
+}
+
+.mood-day-dialog h3 {
+  margin-top: var(--space-24);
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
+.mood-read-moods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+  padding: 0;
+  list-style: none;
+}
+
+.mood-read-moods li {
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-pill);
+  background: var(--sage-100);
+}
+
+.mood-read-note {
+  margin-top: var(--space-16);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .mood-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

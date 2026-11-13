@@ -1,4 +1,5 @@
 -- Closure privacy checks. Run the ENTIRE file in Closure's Supabase SQL Editor.
+-- Run after all migrations in SCHEMA-SETUP.md.
 -- Requires at least two existing accounts. Uses the two oldest accounts.
 -- All fixtures and attempted edits/deletes are rolled back at the end.
 -- No passwords, access tokens, or personal writing are printed.
@@ -102,6 +103,8 @@ declare
   mutation text;
   affected bigint;
   direction integer;
+  attempt_sql text;
+  changed_at timestamptz;
 begin
   for direction in 1..2 loop
     own_account := case when direction = 1 then account_a else account_b end;
@@ -167,6 +170,34 @@ begin
       end if;
       insert into closure_privacy_results values (acting_as || ': update own ' || target.table_name, 'PASS');
 
+      execute format('select updated_at from public.%I where %s', target.table_name, target.own_filter) into changed_at;
+      if changed_at is null or changed_at < transaction_timestamp() then
+        raise exception 'FAIL: updated_at did not refresh for %.', target.table_name;
+      end if;
+      insert into closure_privacy_results values (acting_as || ': timestamp own ' || target.table_name, 'PASS');
+
+      -- Test owner DELETE, then roll back only that operation so both
+      -- accounts can still exercise the same fixtures in the other direction.
+      begin
+        execute format('delete from public.%I where %s', target.table_name, target.own_filter);
+        get diagnostics affected = row_count;
+        if affected <> 1 then raise exception 'FAIL: owner cannot delete %.', target.table_name; end if;
+        raise exception using errcode = 'ZC001', message = 'Rollback disposable owner delete';
+      exception when sqlstate 'ZC001' then
+        null;
+      end;
+      insert into closure_privacy_results values (acting_as || ': delete own ' || target.table_name, 'PASS');
+
+      -- Moving an owned row to another account must fail WITH CHECK.
+      begin
+        execute format('update public.%I set %I = %L where %s', target.table_name,
+          case when target.table_name = 'profiles' then 'id' else 'user_id' end,
+          other_account, target.own_filter);
+        raise exception 'PRIVACY FAIL: owner transfer allowed for %.', target.table_name;
+      exception when insufficient_privilege then
+        insert into closure_privacy_results values (acting_as || ': block owner transfer ' || target.table_name, 'PASS');
+      end;
+
       execute format('select count(*) from public.%I where %s', target.table_name, target.other_filter)
         into affected;
       if affected <> 0 then
@@ -195,9 +226,101 @@ begin
         );
       end loop;
     end loop;
+
+    -- The four upsert shapes match the app; keep existing private values intact.
+    insert into public.profiles (id, preferred_name, goals, timezone, onboarding_complete)
+      values (own_account, 'Privacy test', array['find_peace'], 'UTC', true)
+      on conflict (id) do update set preferred_name = profiles.preferred_name;
+    insert into public.check_ins (user_id, check_in_date, moods, note)
+      values (own_account, fixture_date, array['hopeful'], '')
+      on conflict (user_id, check_in_date) do update set note = check_ins.note;
+    insert into public.journal_entries (id, user_id, title, content, entry_type)
+      values (own_journal, own_account, '', 'Disposable test words.', 'journal')
+      on conflict (id) do update set title = journal_entries.title;
+    insert into public.stories (user_id) values (own_account)
+      on conflict (user_id) do update set what_happened = stories.what_happened;
+    insert into closure_privacy_results values (acting_as || ': owner upserts on all four tables', 'PASS');
+
+    foreach attempt_sql in array array[
+      format('insert into public.profiles (id) values (%L)', other_account),
+      format('insert into public.check_ins (user_id, check_in_date) values (%L, %L)', other_account, fixture_date),
+      format('insert into public.journal_entries (user_id) values (%L)', other_account),
+      format('insert into public.stories (user_id) values (%L)', other_account)
+    ] loop
+      begin
+        execute attempt_sql;
+        raise exception 'PRIVACY FAIL: inserting for another account was allowed.';
+      exception when insufficient_privilege then
+        insert into closure_privacy_results values (
+          acting_as || ': block forged insert ' || split_part(attempt_sql, ' ', 3), 'PASS');
+      end;
+    end loop;
   end loop;
 end;
 $$;
+
+-- Each reflection kind supports owner CRUD and rejects cross-account operations.
+do $$
+declare
+  owner_id uuid := current_setting('closure_test.account_a')::uuid;
+  other_id uuid := current_setting('closure_test.account_b')::uuid;
+  reflection_id uuid;
+  reflection_kind text;
+  affected integer;
+begin
+  foreach reflection_kind in array array['lesson', 'my_part', 'next_time', 'reality_check', 'reason'] loop
+    perform set_config('request.jwt.claim.sub', owner_id::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub', owner_id)::text, true);
+    insert into public.reflections(user_id, kind, content) values(owner_id, reflection_kind, 'Disposable reflection') returning id into reflection_id;
+    update public.reflections set content = 'Owner edit' where id = reflection_id;
+    if not exists(select 1 from public.reflections where id = reflection_id and content = 'Owner edit') then raise exception 'Reflection owner CRUD failed'; end if;
+    begin
+      update public.reflections set user_id = other_id where id = reflection_id;
+      raise exception 'Reflection ownership transfer allowed';
+    exception when insufficient_privilege then null;
+    end;
+    perform set_config('request.jwt.claim.sub', other_id::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub', other_id)::text, true);
+    if exists(select 1 from public.reflections where id = reflection_id) then raise exception 'Reflection visible to stranger'; end if;
+    update public.reflections set content = 'Forbidden' where id = reflection_id;
+    get diagnostics affected = row_count;
+    if affected <> 0 then raise exception 'Reflection stranger update allowed'; end if;
+    delete from public.reflections where id = reflection_id;
+    get diagnostics affected = row_count;
+    if affected <> 0 then raise exception 'Reflection stranger delete allowed'; end if;
+    begin
+      insert into public.reflections(user_id, kind, content) values(owner_id, reflection_kind, 'Forbidden');
+      raise exception 'Reflection forged insert allowed';
+    exception when insufficient_privilege then null;
+    end;
+    perform set_config('request.jwt.claim.sub', owner_id::text, true);
+    perform set_config('request.jwt.claims', json_build_object('sub', owner_id)::text, true);
+    delete from public.reflections where id = reflection_id;
+    get diagnostics affected = row_count;
+    if affected <> 1 then raise exception 'Reflection owner delete failed'; end if;
+    insert into closure_privacy_results values ('Reflections: ' || reflection_kind || ' owner CRUD and isolation', 'PASS');
+  end loop;
+end;
+$$;
+
+reset role;
+set local role anon;
+do $$
+declare
+  table_name text;
+begin
+  foreach table_name in array array['profiles', 'check_ins', 'journal_entries', 'stories', 'reflections'] loop
+    begin
+      execute format('select 1 from public.%I limit 1', table_name);
+      raise exception 'PRIVACY FAIL: anonymous table access was granted for %.', table_name;
+    exception when insufficient_privilege then
+      null;
+    end;
+  end loop;
+end;
+$$;
+reset role;
+insert into closure_privacy_results values ('Anonymous: base tables and reflections denied', 'PASS');
 
 select check_name, result
 from closure_privacy_results

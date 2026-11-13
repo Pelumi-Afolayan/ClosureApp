@@ -1,0 +1,218 @@
+.no-contact-urge-entry {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  background: var(--sage-100);
+}
+
+.no-contact-urge-entry h2,
+.no-contact-urge-entry p {
+  margin: 0;
+}
+
+.no-contact-urge-entry p {
+  color: var(--text-muted);
+}
+
+.urge-screen {
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.urge-shell {
+  max-width: calc(var(--page-narrow) + var(--page-padding-inline) * 2);
+}
+
+.urge-topbar,
+.urge-step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+.urge-topbar {
+  margin-bottom: var(--space-48);
+}
+
+.urge-leave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 44px;
+  color: var(--sage-800);
+}
+
+.urge-step-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.urge-steps {
+  display: flex;
+  gap: var(--space-16);
+  padding: 0;
+  margin: 0 0 var(--space-32);
+  list-style: none;
+}
+
+.urge-steps li {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+}
+
+.urge-steps [aria-current="step"] {
+  background: var(--sage-600);
+  color: var(--on-primary);
+  border-color: var(--sage-600);
+}
+
+.urge-card,
+.urge-step-content,
+.urge-friend {
+  display: grid;
+  gap: var(--space-16);
+  min-width: 0;
+}
+
+.urge-card {
+  padding: var(--space-24);
+}
+
+.urge-card p,
+.urge-friend h2 {
+  margin: 0;
+}
+
+.urge-muted,
+.urge-small {
+  color: var(--text-muted);
+}
+
+.urge-small {
+  font-size: var(--text-small);
+}
+
+.urge-grounding {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 16rem;
+}
+
+.urge-breath-circle {
+  width: 13rem;
+  height: 13rem;
+  border-radius: 50%;
+  background: var(--sage-100);
+  transform: scale(0.8);
+}
+
+.urge-grounding--running .urge-breath-circle {
+  animation: urge-breathe 10s ease-in-out 60;
+}
+
+.urge-breath-copy {
+  position: absolute;
+  width: 100%;
+  max-width: 15rem;
+  text-align: center;
+}
+
+.urge-timer {
+  color: var(--sage-800);
+  font-size: 2.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.urge-pause > .button {
+  justify-self: start;
+}
+
+.urge-step-actions {
+  margin-top: var(--space-32);
+}
+
+.urge-reality-list {
+  display: grid;
+  gap: var(--space-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.urge-reflection {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.urge-choices {
+  display: grid;
+  justify-items: stretch;
+  gap: var(--space-16);
+}
+
+.urge-choices .button,
+.no-contact-urge-entry .button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.urge-friend {
+  margin-top: var(--space-16);
+}
+
+.urge-friend textarea {
+  width: 100%;
+  padding: var(--space-16);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  resize: none;
+}
+
+.urge-reassurance {
+  padding-top: var(--space-24);
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
+}
+
+@keyframes urge-breathe {
+  0%, 100% { transform: scale(0.8); }
+  40% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .urge-grounding--running .urge-breath-circle {
+    animation: none;
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 540px) {
+  .urge-topbar {
+    align-items: flex-start;
+  }
+
+  .urge-card {
+    padding: var(--space-16);
+  }
+}

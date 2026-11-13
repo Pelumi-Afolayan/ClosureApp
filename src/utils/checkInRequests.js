@@ -1,6 +1,20 @@
 // The client is passed in so database request behaviour can be tested safely.
 export function createCheckInService(client) {
   return {
+    async getCheckInsInRange(userId, start, end, signal) {
+      let query = client.from('check_ins')
+        .select('id, check_in_date, moods, note')
+        .eq('user_id', userId)
+        .gte('check_in_date', start)
+        .lte('check_in_date', end)
+        .order('check_in_date', { ascending: true })
+
+      if (signal) query = query.abortSignal(signal)
+      const { data, error } = await query
+      if (error) throw error
+      return data
+    },
+
     async getCheckInDates(userId, signal) {
       const dates = []
       const pageSize = 500

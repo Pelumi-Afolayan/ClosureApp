@@ -1,3 +1,4 @@
+import SupportButton from '../components/SupportButton'
 import NotificationSettings from '../components/NotificationSettings'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
@@ -8,12 +9,12 @@ import { useNavigate } from 'react-router'
 import Button from '../components/ui/Button'
 import { goals } from '../data/goals'
 import { saveProfile } from '../services/profileService'
-import { supabase } from '../lib/supabase'
+import { signOutWithReminderCleanup } from '../services/notificationService'
 import { toggleGoalSelection, validateOnboarding } from '../utils/onboarding'
 
 import '../styles/Onboarding.css'
 
-export default function Onboarding({ user, profile, onComplete }) {
+export default function Onboarding({ user, profile, onComplete, onSupport }) {
   const navigate = useNavigate()
   const [name, setName] = useState(profile?.preferred_name || '')
   const [selectedGoals, setSelectedGoals] = useState(profile?.goals || [])
@@ -73,7 +74,7 @@ export default function Onboarding({ user, profile, onComplete }) {
     setErrorMessage('')
 
     try {
-      const { error } = await supabase.auth.signOut({ scope: 'local' })
+      const { error } = await signOutWithReminderCleanup(user.id, { scope: 'local' })
       if (error) throw error
     } catch {
       setErrorMessage('Could not sign out. Please try again.')
@@ -85,6 +86,7 @@ export default function Onboarding({ user, profile, onComplete }) {
   return (
     <PageShell width="narrow" className="onboarding-page">
       <PageHeader
+        actions={!profile?.onboarding_complete ? <SupportButton onClick={onSupport} /> : undefined}
         titleId="onboarding-title"
         title="Let’s make this space yours."
         subtitle="Choose what matters to you. You can work towards more than one thing, and change your choices later."

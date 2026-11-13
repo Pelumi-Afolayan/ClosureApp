@@ -1,9 +1,10 @@
+import { shouldRereadLetter } from '../utils/letterRelease'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
 import Notice from '../components/ui/Notice'
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useSearchParams } from 'react-router'
 import { BookOpen, PenLine, Plus } from 'lucide-react'
 
 import Button from '../components/ui/Button'
@@ -15,6 +16,7 @@ import '../styles/Journal.css'
 
 export default function Journal({ user, profile }) {
   const [search] = useSearchParams()
+  const location = useLocation()
   const requestedType = search.get('type')
   const entryType = ['journal', 'unsent_letter'].includes(requestedType) ? requestedType : 'all'
   const requestedPage = Number(search.get('page') || 1)
@@ -71,6 +73,10 @@ export default function Journal({ user, profile }) {
           )}
         />
 
+        {entryType === 'unsent_letter' && location.state?.letterReleased && (
+          <Notice variant="success" className="journal-release-notice">Your letter has been released. Take a moment, if you'd like.</Notice>
+        )}
+
         <nav className="journal-filters" aria-label="Filter writing">
           <Chip as={Link} to="/journal" selected={entryType === 'all'}>All writing</Chip>
           <Chip as={Link} to="/journal?type=journal" selected={entryType === 'journal'}>Journal entries</Chip>
@@ -100,6 +106,9 @@ export default function Journal({ user, profile }) {
                 <Card as={Link} to={`/journal/${entry.id}`} className={`journal-entry-card${entry.entry_type === 'unsent_letter' ? ' journal-entry-card--letter' : ''}`}>
                   <p className="journal-entry-date">{formatJournalDate(entry.created_at, profile.timezone)}</p>
                   <h2>{entry.title || (entry.entry_type === 'unsent_letter' ? 'Untitled letter' : 'Untitled entry')}</h2>
+                  {shouldRereadLetter(entry) && (
+                    <p className="journal-reread-label">Written 30+ days ago. Read it again?</p>
+                  )}
                   <span className="journal-entry-type">
                     {entry.entry_type === 'unsent_letter' ? 'Unsent letter' : 'Journal entry'}
                   </span>

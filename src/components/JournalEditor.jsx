@@ -1,3 +1,8 @@
+import JournalStartingPoint from './JournalStartingPoint'
+import { useUrgeSession } from '../hooks/useUrgeSession'
+import { canReleaseLetter, releaseLetter } from '../utils/letterRelease'
+import { saveReflection } from '../services/reflectionService'
+import { journalReflectionDraft, journalReflectionOptions, validateReflection } from '../utils/reflectionRequests'
 import { useEffect, useRef, useState } from 'react'
 import { useBlocker } from 'react-router'
 
@@ -9,14 +14,27 @@ import Notice from './ui/Notice'
 import { deleteJournalEntry, saveJournalEntry } from '../services/journalService'
 import { validateJournalEntry } from '../utils/journalRequests'
 import '../styles/JournalEditor.css'
+import '../styles/Reflections.css'
 
-export default function JournalEditor({ userId, entry, metadata, onSaved, onCancel, onDeleted }) {
+export default function JournalEditor({ userId, entry, metadata, selectedGoals = [], onSaved, onCancel, onDeleted }) {
+  const { session: reflectionSession } = useUrgeSession()
+  const selectionRef = useRef({ start: 0, end: 0 })
+  const reflectionMenuRef = useRef(null)
+  const [lessonKind, setLessonKind] = useState('lesson')
+  const reflectionOption = journalReflectionOptions.find(option => option.kind === lessonKind)
   const initialValues = {
     title: entry?.title || '',
     content: entry?.content || '',
     entryType: entry?.entry_type || 'journal',
   }
 
+  const [releasePhase, setReleasePhase] = useState('confirm')
+  const [releaseError, setReleaseError] = useState('')
+  const releaseDialogRef = useRef(null)
+  const releaseAnimationRef = useRef(null)
+  const releaseTimeoutRef = useRef(null)
+  const [discardLesson, setDiscardLesson] = useState(false)
+  const [lesson, setLesson] = useState(null)
   const [entryId, setEntryId] = useState(entry?.id)
   const [title, setTitle] = useState(initialValues.title)
   const [content, setContent] = useState(initialValues.content)
@@ -30,13 +48,20 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
   const dialogRef = useRef(null)
   const activeRef = useRef(false)
 
+  const savedEntryType = JSON.parse(savedValues).entryType
+  const releaseAvailable = canReleaseLetter({ entryId, entryType, savedEntryType })
   const currentValues = JSON.stringify({ title, content, entryType })
-  const hasUnsavedChanges = currentValues !== savedValues
+  const hasUnsavedChanges = currentValues !== savedValues || Boolean(lesson?.length)
   const blocker = useBlocker(hasUnsavedChanges || Boolean(busy))
 
   useEffect(() => {
     activeRef.current = true
-    return () => { activeRef.current = false }
+    return () => {
+      activeRef.current = false
+      window.clearTimeout(releaseTimeoutRef.current)
+      releaseAnimationRef.current?.(false)
+      releaseAnimationRef.current = null
+    }
   }, [])
 
   useEffect(() => {
@@ -54,7 +79,7 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
   useEffect(() => {
     const dialog = dialogRef.current
 
-    if (blocker.state === 'blocked') {
+    if (discardLesson || blocker.state === 'blocked') {
       if (!hasUnsavedChanges && !busy) {
         blocker.reset()
       } else if (dialog && !dialog.open) {
@@ -63,20 +88,20 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
     } else if (dialog?.open) {
       dialog.close()
     }
-  }, [blocker, hasUnsavedChanges, busy])
+  }, [blocker, hasUnsavedChanges, busy, discardLesson])
 
   // Navigate only after React has recorded the clean saved version.
   useEffect(() => {
     if (!completed || hasUnsavedChanges || busy) return
 
     setCompleted(null)
-    if (completed.deleted) onDeleted()
+    if (completed.deleted) onDeleted(completed)
     else onSaved(completed.entry)
   }, [completed, hasUnsavedChanges, busy, onSaved, onDeleted])
 
   async function handleSubmit(event) {
     event.preventDefault()
-    if (requestRef.current) return
+    if (requestRef.current || lesson !== null) return
 
     const validationError = validateJournalEntry({ content, entryType })
     if (validationError) {
@@ -140,6 +165,70 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
     }
   }
 
+  function openReflectionDraft(kind) {
+    if (requestRef.current || lesson !== null) return
+    const { start, end } = selectionRef.current
+    const draft = journalReflectionDraft(kind, content, start, end)
+    setLessonKind(draft.kind)
+    setLesson(draft.content)
+    setErrorMessage('')
+    setSuccessMessage('')
+    if (reflectionMenuRef.current) reflectionMenuRef.current.open = false
+  }
+
+  function openRelease() {
+    if (!releaseAvailable || requestRef.current || lesson !== null) return
+    setReleaseError('')
+    setReleasePhase('confirm')
+    releaseDialogRef.current?.showModal()
+  }
+
+  function finishReleaseAnimation() {
+    window.clearTimeout(releaseTimeoutRef.current)
+    const resolve = releaseAnimationRef.current
+    releaseAnimationRef.current = null
+    resolve?.(activeRef.current)
+  }
+
+  async function handleRelease() {
+    if (!releaseAvailable || requestRef.current || lesson !== null) return
+    requestRef.current = true
+    setBusy('release')
+    setReleaseError('')
+    setErrorMessage('')
+    setSuccessMessage('')
+
+    try {
+      const result = await releaseLetter({
+        userId, entryId, entryType, savedEntryType,
+        animate: () => new Promise(resolve => {
+          releaseAnimationRef.current = resolve
+          setReleasePhase('animating')
+          // Fallback if an animation event is unavailable (for example, a hidden tab).
+          releaseTimeoutRef.current = window.setTimeout(finishReleaseAnimation, 3000)
+        }),
+        deleteEntry: async (...args) => {
+          if (activeRef.current) setReleasePhase('deleting')
+          return deleteJournalEntry(...args)
+        },
+      })
+      if (!activeRef.current || result.cancelled) return
+      setSavedValues(currentValues)
+      setCompleted(result)
+      releaseDialogRef.current?.close()
+    } catch {
+      if (activeRef.current) {
+        setReleasePhase('error')
+        setReleaseError("We couldn't confirm the release. Your words are still here. Check your connection and try again when you're ready.")
+      }
+    } finally {
+      window.clearTimeout(releaseTimeoutRef.current)
+      releaseAnimationRef.current = null
+      requestRef.current = false
+      if (activeRef.current) setBusy('')
+    }
+  }
+
   return (
     <>
       <Card as="form" className={`journal-editor${entryType === 'unsent_letter' ? ' journal-editor--letter' : ''}`} onSubmit={handleSubmit} aria-busy={Boolean(busy)}>
@@ -151,6 +240,13 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
             <p className="journal-editor-hint">
               This stays here. It isn’t sent to anyone.
             </p>
+          )}
+
+          {!entryId && entryType === 'journal' && (
+            <JournalStartingPoint selectedGoals={selectedGoals} title={title} onTitleChange={value => {
+              setTitle(value)
+              setSuccessMessage('')
+            }} />
           )}
 
           <div className="journal-editor-title-row">
@@ -194,8 +290,12 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
             placeholder={entryType === 'unsent_letter' ? 'What would you like to say?' : 'Start wherever you are…'}
             id="entry-content"
             name="content"
+            onSelect={event => {
+              selectionRef.current = { start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd }
+            }}
             value={content}
             onChange={(event) => {
+              selectionRef.current = { start: event.target.selectionStart, end: event.target.selectionEnd }
               setContent(event.target.value)
               setSuccessMessage('')
             }}
@@ -203,8 +303,59 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
             required
           />
 
+          {lesson === null && (
+            <details className="journal-reflection-menu" ref={reflectionMenuRef}>
+              <summary>Save as...</summary>
+              <div className="journal-reflection-options">
+                {journalReflectionOptions.map(option => (
+                  <Button key={option.kind} type="button" variant="quiet" onClick={() => openReflectionDraft(option.kind)}>
+                    Save as {option.label.toLowerCase()}
+                  </Button>
+                ))}
+              </div>
+            </details>
+          )}
+          {lesson !== null && (
+            <div className="reflection-form journal-reflection-draft">
+              <label htmlFor="journal-lesson">{reflectionOption.title}</label>
+              <p className="journal-editor-hint">This copies your selected words, or the whole entry if nothing was selected. Edit this copy before saving; your journal stays as it is.</p>
+              <textarea id="journal-lesson" autoFocus rows={4} value={lesson} onChange={event => setLesson(event.target.value)} />
+              <p className="journal-editor-hint">{[...lesson].length} / 1,000 characters</p>
+              <div className="journal-prompt-actions">
+                <Button type="button" onClick={async () => {
+                  const validation = validateReflection({ kind: lessonKind, content: lesson })
+                  if (validation) { setErrorMessage(validation); return }
+                  if (requestRef.current) return
+                  if (navigator.onLine === false) {
+                    setErrorMessage("You're offline. Your reflection draft is still here. Reconnect when you want to save.")
+                    return
+                  }
+                  requestRef.current = true
+                  setBusy('lesson')
+                  setErrorMessage('')
+                  try {
+                    const savedReflection = await saveReflection({ userId, kind: lessonKind, content: lesson })
+                    if (activeRef.current) {
+                      reflectionSession.applyChange(savedReflection)
+                      setLesson(null)
+                      setSuccessMessage("Saved to What I'm learning. Your journal entry is unchanged.")
+                    }
+                  } catch {
+                    if (activeRef.current) setErrorMessage('The reflection did not save. Your words are still here. Please try again.')
+                  } finally {
+                    requestRef.current = false
+                    if (activeRef.current) setBusy('')
+                  }
+                }}>{busy === 'lesson' ? 'Saving...' : 'Save reflection'}</Button>
+                <Button type="button" variant="quiet" onClick={() => {
+                  if (lesson.length) setDiscardLesson(true)
+                  else setLesson(null)
+                }}>Cancel reflection</Button>
+              </div>
+            </div>
+          )}
           <div className="journal-editor-actions">
-            <Button type="submit">{busy === 'save' ? 'Saving…' : 'Save'}</Button>
+            <Button type="submit" disabled={lesson !== null}>{busy === 'save' ? 'Saving…' : 'Save'}</Button>
             <Button type="button" variant="quiet" onClick={onCancel}>Cancel</Button>
 
             <div className="journal-save-details">
@@ -214,8 +365,14 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
               </p>
             </div>
 
+            {releaseAvailable && (
+              <Button type="button" secondary className="journal-release-action" disabled={lesson !== null} onClick={openRelease}>
+                Release this letter
+              </Button>
+            )}
+
             {entryId && (
-              <Button type="button" variant="quiet" className="journal-delete-text" onClick={handleDelete}>
+              <Button type="button" variant="quiet" className="journal-delete-text" disabled={lesson !== null} onClick={handleDelete}>
                 {busy === 'delete' ? 'Deleting…' : 'Delete'}
               </Button>
             )}
@@ -226,12 +383,43 @@ export default function JournalEditor({ userId, entry, metadata, onSaved, onCanc
         <Notice variant="success">{successMessage}</Notice>
       </Card>
 
+      <dialog
+        ref={releaseDialogRef}
+        className="letter-release-dialog"
+        aria-labelledby="letter-release-title"
+        aria-describedby="letter-release-description"
+        aria-busy={busy === 'release'}
+        onCancel={event => { if (requestRef.current) event.preventDefault() }}
+      >
+        <h2 id="letter-release-title">A little room to let go</h2>
+        <p id="letter-release-description">Releasing means this letter is deleted for good. You can also keep it.</p>
+        {hasUnsavedChanges && <p className="letter-release-note">Any unsaved edits to this letter will also be discarded.</p>}
+        {['animating', 'deleting', 'error'].includes(releasePhase) && (
+          <div className="letter-release-window">
+            <article className={`letter-release-text${releasePhase === 'error' ? '' : ' letter-release-text--leaving'}`} onAnimationEnd={event => {
+              if (event.target === event.currentTarget) finishReleaseAnimation()
+            }}>
+              <h3>{title || 'Unsent letter'}</h3>
+              <p>{content}</p>
+            </article>
+          </div>
+        )}
+        <p className="letter-release-note" role="status">
+          {releasePhase === 'animating' ? 'Take a breath. Let these words settle.' : releasePhase === 'deleting' ? 'Finishing the release...' : ''}
+        </p>
+        <Notice variant="error" title="The release wasn't confirmed">{releaseError}</Notice>
+        <div className="letter-release-actions">
+          <Button type="button" disabled={busy === 'release'} onClick={handleRelease}>Release it</Button>
+          <Button type="button" secondary disabled={busy === 'release'} onClick={() => releaseDialogRef.current?.close()} autoFocus>Keep it for now</Button>
+        </div>
+      </dialog>
+
       <LeaveDialog
         dialogRef={dialogRef}
         idPrefix="journal-leave"
         busy={Boolean(busy)}
-        onStay={() => blocker.state === 'blocked' && blocker.reset()}
-        onLeave={() => blocker.state === 'blocked' && blocker.proceed()}
+        onStay={() => { setDiscardLesson(false); if (blocker.state === 'blocked') blocker.reset() }}
+        onLeave={() => { if (busy) return; setDiscardLesson(false); setLesson(null); if (blocker.state === 'blocked') blocker.proceed() }}
       />
     </>
   )

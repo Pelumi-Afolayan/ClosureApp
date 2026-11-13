@@ -4,7 +4,7 @@ This is a new backend feature. Nothing sends until all steps below are completed
 Existing app and no-contact tracking do not change. The service worker does not cache anything.
 
 ## 1. Database
-Run `migrations/20261112_push_reminders.sql` in Closure's Supabase SQL Editor, after the activity migration. Keep this migration in source control. It adds owner-only device subscriptions and a service-role-only delivery claim function. Then run `tests/reminders.sql` to verify the database permissions. These SQL checks must run against Supabase; the Node test suite does not execute them.
+Run `migrations/20261112_push_reminders.sql` in Closure's Supabase SQL Editor, after the activity migration. Keep this migration in source control. It adds owner-only device subscriptions and a service-role-only delivery claim function. Then run `migrations/20261113_reminder_lifecycle.sql` before deploying the updated frontend, and run `tests/reminders.sql` to verify the database permissions. These SQL checks must run against Supabase; the Node test suite does not execute them.
 
 ## 2. Keys
 On your own terminal, run `npx web-push generate-vapid-keys --json` once. Keep the private key private; never paste it into chat, Git, or a VITE variable. Keep the pair stable (rotating requires devices to subscribe again).
@@ -39,8 +39,34 @@ Check Cron response counts and Edge Function logs. Push delivery cannot be verif
 - At most one delivery attempt per device per local day, including failed attempts, to avoid retry spam. Expired (404/410) subscriptions are removed. Other failures appear in job counts; fix configuration before the next day's run.
 - Jobs intentionally skip the remainder of a day after a failed attempt. A changing device time setting does not reset the daily claim.
 - Notifications are generic and reveal no personal writing. Previously queued messages can still arrive after turning reminders off.
-- Turn off in Settings on each device to remove its subscription. Account deletion cascades subscription deletion. Logging out does not revoke notification permission or disable previously opted-in reminders; turn off first on shared devices.
+- Turn off in Settings on each device to remove its subscription. Account deletion cascades subscription deletion. Logging out attempts this browser's unsubscribe and owner/device row cleanup before ending the session; cleanup failures and timeouts do not prevent logout. Other devices are not unsubscribed.
 - Only official Google, Mozilla, Apple and Windows push endpoints are accepted to prevent server-side requests to arbitrary addresses. Other push providers need a reviewed allowlist addition.
 - No local timers pretend to deliver notifications while the app is closed.
 
 References: https://supabase.com/docs/guides/functions/schedule-functions and https://developer.mozilla.org/en-US/docs/Web/API/Push_API
+
+
+## Reminder lifecycle update (13 November 2026)
+
+For an existing project, run only `migrations/20261113_reminder_lifecycle.sql` after the existing reminder migration, then run the entire `tests/reminders.sql` with two test accounts. Do not rerun the original table-creation migration. Deploy the updated frontend and service worker together after the SQL update; the old frontend's direct upsert is intentionally no longer permitted. The sender and Cron configuration are unchanged.
+
+The new authenticated `register_push_reminder` function has SECURITY DEFINER, an empty search_path and no user-ID argument. New ownership always comes from auth.uid(). It validates an approved HTTPS endpoint, matching JSON endpoint and subscription-key formats. To transfer another owner's existing endpoint, both the protected auth key and p256dh key must match. A guessed endpoint cannot take over a row. This is subscription-capability verification, not a network proof that a provider has accepted a newly supplied subscription. No prior-owner information is returned. Daily delivery claims are preserved, not reset. Direct browser INSERT/UPDATE grants are revoked, including the old column grants; owner-scoped SELECT/DELETE remain. No new table is added.
+
+A random opaque `closure.push-device-id` is stored in this browser's localStorage and attached to reminder rows. It contains no account ID, email, subscription keys, moods or writing. This lets Settings clean up this browser's rows after a subscription disappears. Legacy active subscriptions acquire that binding on Settings load. If a legacy subscription disappeared before it ever received a binding, the browser has no safe way to identify its old row without deleting reminders on other devices; expired-provider cleanup remains the fallback. Clearing all site storage similarly loses the mapping.
+
+Logout cleanup runs on the normal sign-out screen, profile-load fallback and onboarding/settings sign-out. Browser unsubscribe and remote deletion are independent, bounded attempts. If either succeeds, it prevents future delivery through that path. If both fail, the app still signs out as requested; reminders cannot be guaranteed stopped until cleanup can succeed or permission is revoked in browser settings. Already displayed notifications are closed when possible. Already delivered notifications cannot be recalled from another device. Global session sign-out does not unsubscribe other devices.
+
+`pushsubscriptionchange` does not fetch auth tokens, access sessions, transmit keys, or silently re-enable consent. It retires old/replacement subscriptions and sends only a generic change signal to app windows. The signed-in Settings page reconciles on load, focus, online return, visibility return and that worker message. Reminders show off after lost/revoked permission; remote cleanup failures are indicated calmly. The user can enable again explicitly. Event support varies, so reconciliation does not depend on the worker event alone. The worker checks that a subscription still exists before displaying a queued push; it still never caches pages or writing.
+
+Manual verification on a test deployment:
+1. Enable reminders as account A, then log out. Confirm the device endpoint row is removed, PushManager has no subscription, and this device stops receiving new reminders.
+2. Log in as B in the same browser and enable reminders. Confirm B can save a time without a conflict. The SQL suite separately verifies safe takeover when a valid shared subscription survived a failed logout cleanup.
+3. Keep a second device enabled for A. Signing out the first browser must not remove the second device's row.
+4. Revoke browser notification permission, return to Settings, and confirm off plus removal of this device's mapped row.
+5. Remove/expire the push subscription, return to Settings, and confirm the same result. Re-enable explicitly to subscribe again.
+6. Simulate offline/failed remote deletion and log out: unsubscribe is still attempted, logout completes, and no private values are logged. Reconnect and inspect cleanup/provider expiry behavior.
+7. Test a queued push after unsubscribe and a subscription-change event on supported browsers. A local display test alone is not end-to-end delivery verification.
+
+Node tests include the lifecycle request factory, failures/timeouts, worker changes and execution of the extended SQL suite in embedded PostgreSQL. Real devices and live Supabase still need the manual checks above.
+
+Security/API references: https://www.postgresql.org/docs/current/sql-createfunction.html and https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/pushsubscriptionchange_event
