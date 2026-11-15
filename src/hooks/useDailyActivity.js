@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getLocalDate } from '../utils/dates'
 import { calculateStreaks } from '../utils/streaks'
-import { confirmNoContact, getActivityDates, recordAppVisit } from '../services/activityService'
+import { confirmNoContactDates, confirmNoContact, getActivityDates, recordAppVisit } from '../services/activityService'
 
 function readDate(timezone) {
   try {
@@ -134,6 +134,33 @@ export default function useDailyActivity(kind, userId, timezone) {
     }
   }
 
+  async function confirmDates(dates) {
+    if (kind !== 'noContact' || busyRef.current || loading || state.error || !today) return false
+    busyRef.current = true
+    setSaving(true)
+    setMessage('')
+    const controller = new AbortController()
+    confirmationRef.current = controller
+    const timeout = window.setTimeout(() => controller.abort(), 15000)
+    try {
+      const savedDates = await confirmNoContactDates(dates, readDate(timezone), controller.signal)
+      if (!mountedRef.current) return false
+      requestVersionRef.current += 1
+      setState(current => ({ ...current, dates: [...new Set([...current.dates, ...savedDates])], loading: false, error: '' }))
+      setMessage('Your chosen days are recorded. Time away from the app still counts.')
+      return true
+    } catch {
+      requestVersionRef.current += 1
+      if (mountedRef.current) setState(current => ({ ...current, key: requestKey, loading: false,
+        error: 'We couldn’t verify those dates. They may have been saved. Retry to check before confirming again.' }))
+      return false
+    } finally {
+      window.clearTimeout(timeout)
+      busyRef.current = false
+      if (mountedRef.current) setSaving(false)
+    }
+  }
+
   const counts = today ? calculateStreaks(state.dates, today) : null
 
   return {
@@ -148,5 +175,6 @@ export default function useDailyActivity(kind, userId, timezone) {
     message,
     retry,
     confirmToday,
+    confirmDates,
   }
 }

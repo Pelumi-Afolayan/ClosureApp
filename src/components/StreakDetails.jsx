@@ -1,3 +1,4 @@
+import PastNoContactDays from './PastNoContactDays'
 import NoContactMilestone from './NoContactMilestone'
 import { Check } from 'lucide-react'
 import Button from './ui/Button'
@@ -63,6 +64,7 @@ export default function StreakDetails({ tracker, kind, timezone, showCelebration
           <Notice variant="success">{tracker.message}</Notice>
         </div>
       )}
+      {noContact && <PastNoContactDays tracker={tracker} />}
       {noContact && <NoContactMilestone tracker={tracker} showCelebrations={showCelebrations} />}
       <p className="streak-timezone">Days are counted in {timezone}.</p>
     </>

@@ -248,7 +248,12 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
               </Button>
             </fieldset>
 
-            <Notice variant={saveError ? 'error' : 'success'}>{message}</Notice>
+            <Notice
+              variant={saveError ? 'error' : 'success'}
+              className={saveError ? '' : 'notice--inline'}
+            >
+              {message}
+            </Notice>
           </form>
 
           <p className="today-preview-note">

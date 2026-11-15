@@ -5,7 +5,8 @@ import { useUrgeSession } from '../hooks/useUrgeSession'
 import { canReleaseLetter, releaseLetter } from '../utils/letterRelease'
 import { saveReflection } from '../services/reflectionService'
 import { journalReflectionDraft, journalReflectionOptions, validateReflection } from '../utils/reflectionRequests'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { BookOpen, PenLine } from 'lucide-react'
 import { useBlocker } from 'react-router'
 
 import Button from './ui/Button'
@@ -20,6 +21,7 @@ import '../styles/Reflections.css'
 
 export default function JournalEditor({ userId, entry, draftKey, fixedEntryType, defaultTitle = '', metadata, selectedGoals = [], onSaved, onCancel, onDeleted }) {
   const { session: reflectionSession } = useUrgeSession()
+  const writingTypeId = useId()
   const selectionRef = useRef({ start: 0, end: 0 })
   const reflectionMenuRef = useRef(null)
   const [lessonKind, setLessonKind] = useState('lesson')
@@ -286,22 +288,22 @@ export default function JournalEditor({ userId, entry, draftKey, fixedEntryType,
               }}
             />
 
-            <Field
-              as="select"
-              className="journal-type-field"
-              label="Type of writing"
-              id="entry-type"
-              name="entryType"
-              disabled={Boolean(fixedEntryType)}
-              value={entryType}
-              onChange={(event) => {
-                setEntryType(event.target.value)
-                setSuccessMessage('')
-              }}
-            >
-              <option value="journal">Journal entry</option>
-              <option value="unsent_letter">Unsent letter</option>
-            </Field>
+            <fieldset className="journal-writing-type" disabled={Boolean(fixedEntryType)}>
+              <legend className="writing-accessible-label">Type of writing</legend>
+              {[
+                { value: 'journal', label: 'Journal entry', Icon: BookOpen },
+                { value: 'unsent_letter', label: 'Unsent letter', Icon: PenLine },
+              ].map(({ value, label, Icon }) => (
+                <label className="journal-writing-type__option" key={value}>
+                  <input type="radio" name={`${writingTypeId}-entry-type`} value={value}
+                    checked={entryType === value} onChange={() => { setEntryType(value); setSuccessMessage('') }} />
+                  <span className="journal-writing-type__choice">
+                    <Icon size={18} aria-hidden="true" />
+                    <span>{label}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
           </div>
 
           <Field

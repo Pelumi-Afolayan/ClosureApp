@@ -6,7 +6,7 @@ import UrgeSessionProvider from './UrgeSessionProvider'
 import UrgeFlow from '../pages/UrgeFlow'
 import SupportButton from './SupportButton'
 import SupportDialog from './SupportDialog'
-import LoadingPlaceholder from './ui/LoadingPlaceholder'
+import OpeningScreen from './OpeningScreen'
 import Notice from './ui/Notice'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -89,10 +89,9 @@ export default function SignedInApp({ user }) {
   if (loading) {
     return (
       <>
-        <main className="auth-state">
+        <OpeningScreen label="Getting your space ready">
           <SupportButton onClick={openSupport} />
-          <LoadingPlaceholder label="Getting your space ready…" />
-        </main>
+        </OpeningScreen>
         {supportDialog}
       </>
     )

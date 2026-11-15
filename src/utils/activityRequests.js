@@ -1,3 +1,5 @@
+import { normalizeConfirmationDates } from './noContactHistory.js'
+
 // Server functions decide the authenticated owner and current local date.
 export function createActivityService(client) {
   const tables = { app: 'app_visits', noContact: 'no_contact_days' }
@@ -36,6 +38,17 @@ export function createActivityService(client) {
 
   return {
     getActivityDates,
+    async confirmNoContactDates(dates, today, signal) {
+      const chosen = normalizeConfirmationDates(dates, today)
+      let request = client.rpc('confirm_no_contact_dates', { confirmed_dates: chosen })
+      if (signal) request = request.abortSignal(signal)
+      const { data, error } = await request
+      if (error) throw error
+      if (!Array.isArray(data) || data.length !== chosen.length || [...data].sort().some((date, i) => date !== chosen[i])) {
+        throw new Error('Those dates could not be verified.')
+      }
+      return data
+    },
     recordAppVisit: (signal) => record('record_app_visit', signal),
     confirmNoContact: (signal) => record('confirm_no_contact', signal),
   }

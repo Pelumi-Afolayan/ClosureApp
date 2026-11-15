@@ -1,3 +1,5 @@
+import GettingStartedSettings from '../components/GettingStartedSettings'
+import { destinationAfterOnboarding } from '../utils/firstUseGuide'
 import DataOwnership from '../components/DataOwnership'
 import SupportButton from '../components/SupportButton'
 import InstallSettings from '../components/InstallSettings'
@@ -62,7 +64,7 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
       })
 
       onComplete(savedProfile)
-      navigate('/today', { replace: true })
+      navigate(destinationAfterOnboarding(Boolean(profile?.onboarding_complete)), { replace: true })
     } catch {
       setErrorMessage(
         'We could not save your choices. Your answers are still here. Please try again.'
@@ -196,6 +198,7 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
       </section>
       {profile?.onboarding_complete && <NotificationSettings userId={user.id} timezone={profile.timezone} />}
       {profile?.onboarding_complete && <p className="settings-privacy-link"><Link to="/closing">I feel ready to close this chapter</Link></p>}
+      {profile?.onboarding_complete && <GettingStartedSettings />}
       <ThemeSettings />
       <InstallSettings />
       <p className="settings-privacy-link"><Link to="/privacy">Your privacy</Link></p>

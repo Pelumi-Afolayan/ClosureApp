@@ -1,0 +1,77 @@
+.theme-settings__group {
+  min-width: 0;
+  margin: var(--space-24) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.theme-settings__group legend {
+  padding: 0;
+  margin-bottom: var(--space-16);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.theme-settings__choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+  max-width: 28rem;
+}
+
+.theme-settings__option {
+  position: relative;
+  cursor: pointer;
+}
+
+.theme-settings__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.theme-settings__choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  min-height: 48px;
+  padding: var(--space-16) var(--space-8);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.theme-settings__option:hover .theme-settings__choice {
+  background: var(--hover-surface);
+}
+
+.theme-settings__check {
+  display: none;
+}
+
+.theme-settings__option input:checked + .theme-settings__choice {
+  background: var(--sage-100);
+  border-color: var(--sage-600);
+  color: var(--sage-800);
+  font-weight: 500;
+}
+
+.theme-settings__option input:checked + .theme-settings__choice .theme-settings__check {
+  display: block;
+}
+
+.theme-settings__option input:focus-visible + .theme-settings__choice {
+  outline: 2px solid var(--sage-600);
+  outline-offset: 3px;
+}
+
+.theme-settings__hint {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}

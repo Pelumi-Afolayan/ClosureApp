@@ -1,4 +1,4 @@
--- Run after 20261111_activity_streaks.sql. Requires two existing accounts.
+-- Run after 20261117_no_contact_past_days.sql. Requires two existing accounts.
 -- All test records and operations are rolled back. No private writing is read.
 begin;
 
@@ -48,6 +48,45 @@ declare
   row_count integer;
   returned_day date;
 begin
+  -- Historical confirmations are explicit, caller-owned and idempotent.
+  -- App visits still cannot be backdated and direct historical inserts stay denied.
+  perform public.confirm_no_contact_dates(array[local_day - 3, local_day - 2, local_day - 3]);
+  perform public.confirm_no_contact_dates(array[local_day - 3]);
+  if (select count(*) from public.no_contact_days where user_id = owner_id and activity_date = local_day - 3) <> 1 then
+    raise exception 'Historical duplicate confirmation failed.';
+  end if;
+  if (select count(*) from public.no_contact_days where user_id = other_id) <> 0 then
+    raise exception 'Historical confirmation exposed another owner.';
+  end if;
+  if has_function_privilege('anon', 'public.confirm_no_contact_dates(date[])', 'execute') then
+    raise exception 'Anonymous historical confirmation was granted.';
+  end if;
+  -- A mixed valid/invalid batch must fail as a whole.
+  select count(*) into row_count from public.no_contact_days where user_id = owner_id;
+  begin
+    perform public.confirm_no_contact_dates(array[local_day - 100, local_day + 1]);
+    raise exception 'Future confirmation was allowed.';
+  exception when invalid_parameter_value then null;
+  end;
+  if (select count(*) from public.no_contact_days where user_id = owner_id) <> row_count then
+    raise exception 'Invalid confirmation batch partially wrote rows.';
+  end if;
+  begin
+    perform public.confirm_no_contact_dates(array[null::date]);
+    raise exception 'NULL confirmation was allowed.';
+  exception when invalid_parameter_value then null;
+  end;
+  begin
+    perform public.confirm_no_contact_dates(array[]::date[]);
+    raise exception 'Empty confirmation was allowed.';
+  exception when invalid_parameter_value then null;
+  end;
+  begin
+    perform public.confirm_no_contact_dates(array['infinity'::date]);
+    raise exception 'Infinite confirmation was allowed.';
+  exception when invalid_parameter_value then null;
+  end;
+
   -- Both RPCs are repeatable without adding another row for the same date.
   returned_day := public.record_app_visit();
   if returned_day <> local_day then raise exception 'App visit used an unexpected date.'; end if;
@@ -106,6 +145,11 @@ set local role anon;
 
 do $$
 begin
+  begin
+    perform public.confirm_no_contact_dates(array[current_date - 1]);
+    raise exception 'Anonymous historical confirmation was allowed.';
+  exception when insufficient_privilege then null;
+  end;
   begin
     perform public.record_app_visit();
     raise exception 'Anonymous app recording was allowed.';

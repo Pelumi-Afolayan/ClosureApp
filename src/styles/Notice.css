@@ -32,3 +32,19 @@
   margin-bottom: var(--space-8);
   font-weight: 600;
 }
+
+/* A quiet confirmation for a completed check-in. */
+.notice--inline {
+  align-items: center;
+  gap: var(--space-8);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  line-height: 1.5;
+}
+
+.notice--inline > svg {
+  flex-shrink: 0;
+  margin-top: 0;
+}

@@ -75,3 +75,11 @@ The scenic background is WebP (~44 KB) with a palette PNG fallback (~185 KB); bo
 ## Status and limits
 
 Automated local SQL, draft, cache-rule, accessibility-markup, request and theme checks are in `tests/`. Real-device install, real push delivery, Lighthouse and current remote schema/function verification need the manual checklist. A successful build does not prove these. Vite currently reports a large single JavaScript chunk; route-level splitting is a future performance improvement. The AI chatbot remains unimplemented.
+
+## Quick tour and feedback
+
+A first onboarding save opens a skippable three-step tour on Today. Settings → Take the quick tour reopens it. The guide uses only UI state and a non-sensitive `guide=1` parameter; it does not collect analytics or add database columns. Skipping/finishing removes that parameter.
+
+Set `VITE_FEEDBACK_FORM_URL` to your public HTTPS feedback form URL in `.env.local` and the hosting environment, then rebuild. Without a valid URL Settings honestly shows that the form is unavailable. The link opens a new tab with no referrer and never appends account identifiers, moods, writing, device information or logs. The external form has its own privacy settings: consider disabling email collection/sign-in requirements, avoid private-writing questions, and test it before publishing.
+
+Suggested form fields: What were you trying to do? What felt confusing or did not work? What would you improve? Keep answers optional and include: Please do not share passwords or private journal entries.

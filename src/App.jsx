@@ -5,7 +5,7 @@ import { usePwa } from './hooks/usePwa'
 import { drafts } from './utils/draftStorage'
 import { authStorageKey } from './lib/supabase'
 import Goodbye from './pages/Goodbye'
-import LoadingPlaceholder from './components/ui/LoadingPlaceholder'
+import OpeningScreen from './components/OpeningScreen'
 import Notice from './components/ui/Notice'
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
@@ -98,11 +98,7 @@ export default function App() {
   if (location.pathname === '/goodbye') return <Goodbye />
 
   if (loading) {
-    return (
-      <main className="auth-state">
-        <LoadingPlaceholder label="Checking your sign-inâ€¦" />
-      </main>
-    )
+    return <OpeningScreen />
   }
 
   if (sessionError) {

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useBlocker } from 'react-router'
-import { Download, Trash2 } from 'lucide-react'
+import { Download, Trash2, FileText, Braces, Check } from 'lucide-react'
 import Button from './ui/Button'
 import Card from './ui/Card'
 import Notice from './ui/Notice'
@@ -12,6 +12,7 @@ import '../styles/DataOwnership.css'
 export default function DataOwnership({ userId, timezone = 'UTC', exportOnly = false }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [format, setFormat] = useState('markdown')
+  const formatId = useId()
   const [busy, setBusy] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [permanent, setPermanent] = useState(false)
@@ -82,11 +83,33 @@ export default function DataOwnership({ userId, timezone = 'UTC', exportOnly = f
       <Card className="data-export" aria-labelledby="data-export-title">
         <h3 id="data-export-title">Download my data</h3>
         <p>Take a copy of your profile, moods, writing, story, reflections and activity dates. Nothing is sent elsewhere to prepare it. Only saved account data is included; save any device drafts first if you want them in the download.</p>
-        <label htmlFor="data-export-format">Download format</label>
-        <select id="data-export-format" value={format} disabled={Boolean(busy)} onChange={event => setFormat(event.target.value)}>
-          <option value="markdown">Markdown â€” a readable text file</option>
-          <option value="json">JSON â€” structured data</option>
-        </select>
+        <fieldset className="export-format" disabled={Boolean(busy)}>
+          <legend>Download format</legend>
+          <div className="export-format__options">
+            {[
+              { value: 'markdown', label: 'Markdown', description: 'A readable text file', Icon: FileText },
+              { value: 'json', label: 'JSON', description: 'Structured data', Icon: Braces },
+            ].map(({ value, label, description, Icon }) => (
+              <label className="export-format__option" key={value}>
+                <input
+                  type="radio"
+                  name={`${formatId}-format`}
+                  value={value}
+                  checked={format === value}
+                  onChange={() => setFormat(value)}
+                />
+                <span className="export-format__choice">
+                  <Icon size={24} aria-hidden="true" />
+                  <span className="export-format__text">
+                    <span className="export-format__name">{label}</span>
+                    <span className="export-format__description">{description}</span>
+                  </span>
+                  <Check className="export-format__check" size={20} aria-hidden="true" />
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <Button type="button" requiresConnection secondary disabled={Boolean(busy)} onClick={download}><Download size={18} aria-hidden="true" />{busy === 'export' ? 'Preparing your download...' : 'Download my data'}</Button>
         <Notice variant="success">{message}</Notice>
       </Card>

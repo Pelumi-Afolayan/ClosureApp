@@ -6,7 +6,7 @@
 }
 
 .no-contact-progress {
-  margin-top: var(--space-32);
+  margin-top: var(--space-24);
 }
 
 .no-contact-confirmation {
@@ -81,9 +81,6 @@
   gap: var(--space-16);
 }
 
-.no-contact-progress {
-  margin-top: 0;
-}
 
 .no-contact-guidance {
   margin-top: var(--space-48);

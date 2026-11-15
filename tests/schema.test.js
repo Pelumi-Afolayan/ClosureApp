@@ -71,7 +71,7 @@ test('fresh backend runs all migrations in order and every SQL privacy suite', a
     const before = await snapshot(db)
     await db.exec(migration)
     assert.deepEqual(await snapshot(db), before, 'rerunning the base migration preserves every existing value')
-    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql']) {
+    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql', '20261117_no_contact_past_days.sql']) {
       await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
     }
     for (const name of ['privacy.sql', 'activity_privacy.sql', 'reminders.sql', 'account_deletion.sql']) {
@@ -255,7 +255,7 @@ test('account deletion SQL fixtures work when profile names have no default', as
   try {
     await db.exec(migration)
     await fixtures(db)
-    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql']) {
+    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql', '20261117_no_contact_past_days.sql']) {
       await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
     }
     await db.exec('alter table public.profiles alter column preferred_name drop default')

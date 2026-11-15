@@ -1,8 +1,11 @@
+import FirstUseGuide from '../components/FirstUseGuide'
+import { withoutGuideParameter } from '../utils/firstUseGuide'
+import WelcomeBack from '../components/WelcomeBack'
 import SupportButton from '../components/SupportButton'
 import SmallSteps from '../components/SmallSteps'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
-import { Link, useOutletContext } from 'react-router'
+import { Link, useOutletContext, useSearchParams } from 'react-router'
 import { BookHeart, BookOpen, CalendarDays, ChevronRight, PenLine } from 'lucide-react'
 
 import { goals } from '../data/goals'
@@ -20,12 +23,16 @@ const writingLinks = [
 ]
 
 export default function Today({ user, profile }) {
+  const [searchParams, setSearchParams] = useSearchParams()
   const { openSupport } = useOutletContext()
   const preferredName = profile?.preferred_name || ''
   const selectedGoalLabels = goals.filter((goal) => profile?.goals?.includes(goal.id))
 
   return (
     <PageShell id="today-main" className="today-main">
+      {searchParams.get('guide') === '1' && <FirstUseGuide onClose={() => {
+        setSearchParams(withoutGuideParameter(searchParams), { replace: true })
+      }} />}
       <PageHeader
         title={preferredName ? `Welcome, ${preferredName}.` : 'Welcome to your space.'}
         subtitle="A little space for you, one day at a time."
@@ -36,6 +43,8 @@ export default function Today({ user, profile }) {
           </div>
         )}
       />
+
+      <WelcomeBack />
 
       <DailyEncouragement
         userId={user.id}

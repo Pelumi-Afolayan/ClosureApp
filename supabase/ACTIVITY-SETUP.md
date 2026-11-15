@@ -31,3 +31,7 @@
 - Verify that navigating from an unsaved story or journal to No contact still offers Keep writing / Discard and leave.
 
 Local tests and build can verify the code, but database policies require running the SQL check in Supabase.
+
+## Adding past no-contact confirmations
+
+Apply `migrations/20261117_no_contact_past_days.sql` after the existing activity migration. No Contact now offers an explicit date picker and confirmation action for past days. Duplicate days count once, future dates are rejected, and app visits cannot be backfilled. The welcome-back card uses existing visit dates, not mood check-ins. Its optional absence choice stays in memory and is never sent to the backend. Run the updated `tests/activity_privacy.sql` to verify permissions.
