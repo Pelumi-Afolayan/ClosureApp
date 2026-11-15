@@ -1,9 +1,9 @@
 // Testable reminder lifecycle; browser APIs and the Supabase client are injected.
-export function createNotificationActions(client, browser, { timeoutMs = 2500 } = {}) {
+export function createNotificationActions(client, browser, { timeoutMs = 2500, registrationTimeoutMs = 15000, permissionTimeoutMs = 120000 } = {}) {
   let generation = 0
   let cleanupInProgress = Promise.resolve()
 
-  async function bounded(action) {
+  async function bounded(action, limit = timeoutMs) {
     const controller = new AbortController()
     let timer
     try {
@@ -12,8 +12,8 @@ export function createNotificationActions(client, browser, { timeoutMs = 2500 } 
         new Promise((_, reject) => {
           timer = setTimeout(() => {
             controller.abort()
-            reject(new Error('Could not finish reminder cleanup.'))
-          }, timeoutMs)
+            reject(new Error('The reminder request took too long. Check your connection and try again when youâ€™re ready.'))
+          }, limit)
         }),
       ])
     } finally { clearTimeout(timer) }
@@ -120,12 +120,19 @@ export function createNotificationActions(client, browser, { timeoutMs = 2500 } 
       if (version !== generation) throw new Error('Reminder setup was cancelled.')
     }
     // This call happens before awaiting network work, directly from the button press.
-    const permission = await browser.requestPermission()
+    const permission = await bounded(() => browser.requestPermission(), permissionTimeoutMs)
     assertActive()
     if (permission !== 'granted') throw new Error('Notifications are blocked. You can allow them in your browser settings.')
     await cleanupInProgress
     assertActive()
-    const subscription = await bounded(() => browser.subscribe())
+    const subscriptionPromise = browser.subscribe()
+    // A timed-out browser registration can still resolve later. Retire that
+    // late subscription so logout/cancellation cannot leave a live device.
+    let accepted = true
+    subscriptionPromise.then(subscription => { if (!accepted || version !== generation) subscription.unsubscribe().catch(() => {}) }).catch(() => {})
+    let subscription
+    try { subscription = await bounded(() => subscriptionPromise, registrationTimeoutMs) }
+    catch (error) { accepted = false; generation++; throw error }
     assertActive()
     await register(userId, subscription, time, deviceId)
     if (version !== generation) {

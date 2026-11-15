@@ -1,10 +1,13 @@
+import DataOwnership from '../components/DataOwnership'
 import SupportButton from '../components/SupportButton'
+import InstallSettings from '../components/InstallSettings'
+import ThemeSettings from '../components/ThemeSettings'
 import NotificationSettings from '../components/NotificationSettings'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import Notice from '../components/ui/Notice'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 
 import Button from '../components/ui/Button'
 import { goals } from '../data/goals'
@@ -18,6 +21,7 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
   const navigate = useNavigate()
   const [name, setName] = useState(profile?.preferred_name || '')
   const [selectedGoals, setSelectedGoals] = useState(profile?.goals || [])
+  const [showCelebrations, setShowCelebrations] = useState(profile?.show_celebrations !== false)
   const [saving, setSaving] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -54,6 +58,7 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
         goals: selectedGoals,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
         onboarding_complete: true,
+        show_celebrations: showCelebrations,
       })
 
       onComplete(savedProfile)
@@ -152,6 +157,23 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
             </p>
           </fieldset>
 
+          <div className="celebration-setting">
+            <label className="onboarding-goal" htmlFor="show-celebrations">
+              <input
+                id="show-celebrations"
+                type="checkbox"
+                checked={showCelebrations}
+                onChange={event => setShowCelebrations(event.target.checked)}
+                disabled={busy}
+                aria-describedby="celebrations-hint"
+              />
+              <span>Show celebration popups</span>
+            </label>
+            <p id="celebrations-hint" className="onboarding-hint">
+              Optional. When off, your confirmed days still count. Milestone cards stay available to open yourself. Save with Continue to my space below.
+            </p>
+          </div>
+
           <Notice variant="error">
             {errorMessage}
           </Notice>
@@ -173,6 +195,11 @@ export default function Onboarding({ user, profile, onComplete, onSupport }) {
         </button>
       </section>
       {profile?.onboarding_complete && <NotificationSettings userId={user.id} timezone={profile.timezone} />}
+      {profile?.onboarding_complete && <p className="settings-privacy-link"><Link to="/closing">I feel ready to close this chapter</Link></p>}
+      <ThemeSettings />
+      <InstallSettings />
+      <p className="settings-privacy-link"><Link to="/privacy">Your privacy</Link></p>
+      <DataOwnership key={user.id} userId={user.id} timezone={profile?.timezone || 'UTC'} />
     </PageShell>
   )
 }

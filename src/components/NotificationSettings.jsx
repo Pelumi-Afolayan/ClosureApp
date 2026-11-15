@@ -61,7 +61,7 @@ export default function NotificationSettings({ userId, timezone }) {
     try {
       if (action === 'off') { await disableReminder(userId); setEnabled(false); setMessage('Reminders are off on this device.') }
       else if (action === 'test') { await testReminder(); setMessage('Test sent. This checks this device, not the scheduled server delivery.') }
-      else { await enableReminder(userId, time); setEnabled(true); setMessage('Reminder saved for this device. We only remind you if you have not opened Closure today.') }
+      else { await enableReminder(userId, time); setEnabled(true); setMessage('Reminder saved for this device. It’s an optional invitation to return; there’s nothing you need to catch up on.') }
     } catch (cause) { setError(cause.message || 'Could not update reminders. Please try again.') }
     finally { actionBusy.current = false; setBusy(false) }
   }
@@ -74,9 +74,9 @@ export default function NotificationSettings({ userId, timezone }) {
         : <>
           <label htmlFor="reminder-time">Remind me at</label>
           <input id="reminder-time" type="time" value={time} disabled={busy} onChange={(event) => setTime(event.target.value)} />
-          <p className="reminder-small">Time in {timezone || 'your saved profile timezone'}. This setting applies to this device. Delivery can be delayed by your browser or connection. Logging out turns reminders off on this device.</p>
+          <p className="reminder-small">Time in {timezone || 'your saved profile timezone'}. This setting applies to this device. Delivery can be delayed by your browser or connection. Logging out tries to turn reminders off on this device. You can also block notifications in your browser.</p>
           <div className="reminder-actions">
-            <Button type="button" disabled={busy || !time} onClick={() => update('save')}>{enabled ? 'Save reminder time' : 'Enable reminders'}</Button>
+            <Button type="button" requiresConnection disabled={busy || !time} onClick={() => update('save')}>{enabled ? 'Save reminder time' : 'Enable reminders'}</Button>
             {enabled && <><Button type="button" secondary disabled={busy} onClick={() => update('test')}>Send a test</Button><Button type="button" variant="quiet" disabled={busy} onClick={() => update('off')}>Turn off</Button></>}
           </div>
         </>}

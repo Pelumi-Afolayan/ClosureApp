@@ -11,7 +11,17 @@ export function milestoneLabel(days) {
 }
 export const milestoneMessages = [
   'You have kept choosing space for yourself, one day at a time. That effort deserves a moment of pride.',
-  'Some days take more courage than others. Every confirmed day here represents a choice you made for yourself.',
+  'These are days you chose to confirm. A number cannot capture everything you have been carrying.',
   'Take a breath and notice how far you have come. You are allowed to be proud of these small, steady steps.',
-  'You are making room for your own life again. Keep going gently, at a pace that feels right for you.',
+  'There is room for you here, on the steady days and the difficult ones. You can take your time.',
 ]
+
+// Consume a confirmation even when popups are off, so enabling the preference
+// later cannot replay an old confirmation. This never writes activity data.
+export function getMilestoneAnnouncement(tracker, announcedKey, showCelebrations = true) {
+  const { today, current: days, message, error, loading, saving, recordedToday } = tracker
+  const key = `${today}:${days}`
+  if (!message || error || loading || saving || !recordedToday
+    || latestMilestone(days) !== days || announcedKey === key) return null
+  return { key, open: showCelebrations !== false }
+}

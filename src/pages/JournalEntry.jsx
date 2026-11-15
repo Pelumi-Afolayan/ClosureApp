@@ -1,3 +1,4 @@
+import JournalReader from '../components/JournalReader'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
@@ -17,9 +18,11 @@ export default function JournalEntry({ user, profile }) {
   const navigate = useNavigate()
   const location = useLocation()
   const initialType = search.get('type') === 'unsent_letter' ? 'unsent_letter' : 'journal'
+  const [editingKey, setEditingKey] = useState(null)
+  const editing = Boolean(entryId && editingKey === location.key)
   const [result, setResult] = useState(null)
   const [attempt, setAttempt] = useState(0)
-  const key = `${user.id}:${entryId}`
+  const key = `${user.id}:${entryId}:${attempt}`
   const loading = entryId && (!result || result.key !== key || result.loading)
 
   useEffect(() => {
@@ -28,7 +31,6 @@ export default function JournalEntry({ user, profile }) {
     let active = true
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
-    setResult({ key, loading: true })
 
     getJournalEntry(user.id, entryId, controller.signal)
       .then((entry) => {
@@ -51,6 +53,7 @@ export default function JournalEntry({ user, profile }) {
       navigate(`/journal/${savedEntry.id}`, { replace: true, state: { saved: true } })
     } else {
       setResult({ key, entry: savedEntry, loading: false })
+      setEditingKey(null)
     }
   }, [entryId, navigate, key])
 
@@ -62,16 +65,19 @@ export default function JournalEntry({ user, profile }) {
     }
   }, [navigate])
 
-  const returnToJournal = useCallback(() => navigate('/journal'), [navigate])
+  // A same-page navigation changes location.key and returns to reading. The
+  // existing editor blocker can intercept it before any draft is discarded.
+  const cancelEditing = useCallback(() => {
+    navigate(entryId ? `/journal/${entryId}` : '/journal', { replace: Boolean(entryId) })
+  }, [entryId, navigate])
 
-  const entry = entryId ? result?.entry : { entry_type: initialType }
+  const entry = entryId ? (result?.key === key ? result.entry : null) : { entry_type: initialType }
 
   return (
     <div className="journal-page">
-      <PageShell width="narrow" className="journal-main journal-editor-page">
+      <PageShell width="narrow" className={`journal-main ${!entryId || editing ? 'journal-editor-page' : 'journal-reader-page'}`}>
         <PageHeader
           title={entry?.entry_type === 'unsent_letter' ? 'Unsent letter' : entryId ? 'Journal entry' : 'New entry'}
-          subtitle="No perfect words needed. Save whenever you’re ready."
         />
 
         {loading ? (
@@ -90,19 +96,23 @@ export default function JournalEntry({ user, profile }) {
         ) : (
           <>
             {entryId && location.state?.saved && <p role="status" className="writing-accessible-label">Saved. You can come back to this any time.</p>}
-            <JournalEditor
-              key={entryId || `new:${initialType}`}
-              userId={user.id}
-              selectedGoals={profile.goals}
-              entry={entry}
-              metadata={entryId ? (
-                <>Created {formatJournalDate(entry.created_at, profile.timezone)}
-                  {' · '}Last edited {formatJournalDate(entry.updated_at, profile.timezone)}</>
-              ) : null}
-              onSaved={handleSaved}
-              onCancel={returnToJournal}
-              onDeleted={handleDeleted}
-            />
+            {entryId && !editing ? (
+              <JournalReader key={key} entry={entry} timezone={profile.timezone} onEdit={() => setEditingKey(location.key)} />
+            ) : (
+              <JournalEditor
+                key={entryId || `new:${initialType}`}
+                userId={user.id}
+                selectedGoals={profile.goals}
+                entry={entry}
+                metadata={entryId ? (
+                  <>Created {formatJournalDate(entry.created_at, profile.timezone)}
+                    {' · '}Last edited {formatJournalDate(entry.updated_at, profile.timezone)}</>
+                ) : null}
+                onSaved={handleSaved}
+                onCancel={cancelEditing}
+                onDeleted={handleDeleted}
+              />
+            )}
           </>
         )}
       </PageShell>

@@ -8,13 +8,14 @@ The repository now versions the four base tables used by the app: `profiles`, `c
 2. Open a new SQL query, paste the **entire** `supabase/migrations/20261110_base_schema.sql` file and Run. Wait for success.
 3. Run the **entire** `supabase/migrations/20261111_activity_streaks.sql` file. Wait for success.
 4. Run the **entire** `supabase/migrations/20261112_push_reminders.sql` file. Wait for success. This migration creates its table without IF NOT EXISTS: run it once on a fresh project, not repeatedly on an existing project.
-5. Run the **entire** `supabase/migrations/20261113_reminder_lifecycle.sql` file. Run `supabase/migrations/20261114_reflections.sql` next to create the private reflection lists. Then configure the frontend `.env.local` with this project's `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Use the corresponding variables on the hosting platform. Do not put a service-role key into the frontend.
+5. Run the **entire** `supabase/migrations/20261113_reminder_lifecycle.sql` file. Run `supabase/migrations/20261114_reflections.sql` next to create the private reflection lists. Then run `supabase/migrations/20261115_account_deletion.sql` to verify/repair account deletion cascades. Then run `supabase/migrations/20261115_celebration_preferences.sql` to add the default-on popup preference (existing profile RLS applies). Run `supabase/migrations/20261116_looking_forward.sql` next to add the sixth private reflection kind. Then configure the frontend `.env.local` with this project's `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Use the corresponding variables on the hosting platform. Do not put a service-role key into the frontend.
 6. In Supabase Auth, configure the deployed site URL and the exact development/deployment redirect URLs you use. Signup/Google return to the current origin `/`; password recovery returns to `/reset-password`. Configure Google credentials if offering Google sign-in. Email signup/recovery delivery and confirmation settings are project configuration, not database migration side effects.
 7. Start the frontend yourself in its project directory with `npm ci` followed by `npm run dev`. Complete signup/confirmation and onboarding. The app creates/upserts a profile when onboarding is saved; there is no required auth-user-created trigger in the base migration.
 8. Create two disposable test accounts through Auth/the app, then run these SQL checks in order, as entire files:
    - `supabase/tests/privacy.sql`
    - `supabase/tests/activity_privacy.sql`
    - `supabase/tests/reminders.sql`
+   - `supabase/tests/account_deletion.sql`
    The first two require two existing auth users; all tests use transactions and roll back their fixtures. They do not print names, moods, writing or credentials. An exception is a failed check, not a success to ignore.
 9. To activate optional remote reminders, follow `supabase/REMINDERS-SETUP.md`: generate VAPID keys, set server secrets, deploy `send-reminders`, create its authenticated Cron invocation, set the public VAPID frontend variable, deploy the frontend and test on a real device. Database migrations alone do not deploy functions or schedule notifications.
 
@@ -63,3 +64,19 @@ npm run lint
 `tests/schema.test.js` executes the actual migration SQL in PGlite (embedded PostgreSQL), with a minimal **test-only** substitute for Supabase's auth roles/users/uid function. It verifies fresh setup in order, all three SQL privacy scripts, repeat application/data preservation, owner access, forged inserts/transfers, old broad-policy protection, timestamps, unique/check constraints, auth-user delete cascades, missing defaults/timestamps/constraints and atomic rollback for incompatible schemas/NULLs.
 
 These tests use synthetic accounts in memory. They never connect to the live Supabase database or delete a real auth user. Passing them does not verify the existing project's exact schema, live Auth provider settings, emails, Edge Function deployment or remote push delivery. Run the SQL suites in the target Supabase project as well.
+
+Account export/deletion deployment and disposable-account checks are in `DELETE-ACCOUNT-SETUP.md`. SQL alone does not deploy the delete-account Edge Function.
+
+
+## Privacy copy and optional celebrations
+
+On an existing project, run the entire `supabase/migrations/20261115_celebration_preferences.sql` before deploying this frontend. It adds `profiles.show_celebrations boolean not null default true` without replacing profile choices. It is safe to rerun; saved opt-outs remain off. Then run the updated `supabase/tests/privacy.sql` as an entire file (it rolls back).
+
+Settings saves Show celebration popups with Continue to my space. It defaults on. Turning it off prevents automatic no-contact milestone dialogs; confirmed dates and counts are unchanged, and manual milestone viewing remains available. The choice is included in data exports. A new sign-in/profile load reads changes from another device; an already-open second tab does not receive live preference updates.
+
+`/privacy` is public and linked from Welcome and Settings. It explains stored data, administrator access, the absence of end-to-end encryption, generic notifications, and export/deletion limits without claiming encryption at rest or a provider retention policy.
+
+
+## Looking forward to
+
+Run the entire `20261116_looking_forward.sql` after earlier migrations and before deploying the new reflection UI. It replaces the kind check to allow `looking_forward`, keeping the existing content checks, RLS, index, timestamp trigger and cascading owner foreign key. It is repeatable and does not rewrite content. Run the current privacy and deletion SQL tests only after this migration; they now include all six kinds.

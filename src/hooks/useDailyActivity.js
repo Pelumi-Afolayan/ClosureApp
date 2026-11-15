@@ -17,6 +17,8 @@ export default function useDailyActivity(kind, userId, timezone) {
   const [state, setState] = useState({ dates: [], loading: true, error: '' })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const requestKey = `${kind}:${userId}:${today}:${attempt}`
+  const loading = state.key !== requestKey || state.loading
   const busyRef = useRef(false)
   const confirmationRef = useRef(null)
   const requestVersionRef = useRef(0)
@@ -59,8 +61,6 @@ export default function useDailyActivity(kind, userId, timezone) {
     const version = ++requestVersionRef.current
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
-    setState((current) => ({ ...current, loading: true, error: '' }))
-    setMessage('')
 
     async function load() {
       // Reading no-contact history must NEVER confirm a day automatically.
@@ -68,15 +68,16 @@ export default function useDailyActivity(kind, userId, timezone) {
         await recordAppVisit(controller.signal)
       }
       const dates = await getActivityDates(kind, userId, controller.signal)
-      if (active && version === requestVersionRef.current) setState({ dates, loading: false, error: '' })
+      if (active && version === requestVersionRef.current) { setState({ key: requestKey, dates, loading: false, error: '' }); setMessage('') }
     }
 
     load().catch(() => {
       if (active && version === requestVersionRef.current) setState((current) => ({
         ...current,
+        key: requestKey,
         loading: false,
         error: kind === 'app'
-          ? 'We couldn’t verify today’s visit. It may already have been recorded. Retry to refresh your streak.'
+          ? 'We couldn’t verify today’s visit. It may already have been recorded. You can try again to refresh your visit dates.'
           : 'We couldn’t load your no-contact history. Please try again. Nothing was confirmed automatically.',
       }))
     }).finally(() => window.clearTimeout(timeout))
@@ -86,15 +87,15 @@ export default function useDailyActivity(kind, userId, timezone) {
       window.clearTimeout(timeout)
       controller.abort()
     }
-  }, [kind, userId, today, attempt])
+  }, [kind, userId, today, attempt, requestKey])
 
   async function confirmToday() {
-    if (kind !== 'noContact' || busyRef.current || state.loading || state.error || !today) return
+    if (kind !== 'noContact' || busyRef.current || loading || state.error || !today) return
     if (state.dates.includes(today)) return
     const currentDate = readDate(timezone)
     if (currentDate !== today) {
       setToday(currentDate)
-      setMessage('It’s a new day. Please confirm again for today once the tracker has loaded.')
+      setMessage('It’s a new day. Once the tracker has loaded, you can choose whether to confirm today.')
       return
     }
 
@@ -116,12 +117,13 @@ export default function useDailyActivity(kind, userId, timezone) {
         loading: false,
         error: '',
       }))
-      setMessage('Today is confirmed. You’re giving yourself space, one day at a time.')
+      setMessage('Today is recorded. You can take the rest at your own pace.')
       if (savedDate !== today) setToday(savedDate)
     } catch {
       requestVersionRef.current += 1
       if (mountedRef.current) setState((current) => ({
         ...current,
+        key: requestKey,
         loading: false,
         error: 'We couldn’t verify that confirmation. It may have been saved. Retry to check before confirming again.',
       }))
@@ -137,8 +139,8 @@ export default function useDailyActivity(kind, userId, timezone) {
   return {
     today,
     dates: state.dates,
-    loading: state.loading,
-    error: !today ? 'We couldn’t read your timezone. Please open Settings and save your profile again.' : state.error,
+    loading,
+    error: !today ? 'We couldn’t read your timezone. Please open Settings and save your profile again.' : loading ? '' : state.error,
     current: counts?.currentStreak || 0,
     longest: counts?.longestStreak || 0,
     recordedToday: counts?.checkedInToday || false,

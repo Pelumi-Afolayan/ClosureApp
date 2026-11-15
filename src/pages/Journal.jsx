@@ -21,17 +21,16 @@ export default function Journal({ user, profile }) {
   const entryType = ['journal', 'unsent_letter'].includes(requestedType) ? requestedType : 'all'
   const requestedPage = Number(search.get('page') || 1)
   const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
-  const requestKey = `${user.id}:${entryType}:${page}`
 
   const [result, setResult] = useState(null)
   const [attempt, setAttempt] = useState(0)
+  const requestKey = `${user.id}:${entryType}:${page}:${attempt}`
   const loading = !result || result.key !== requestKey || result.loading
 
   useEffect(() => {
     let active = true
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
-    setResult({ key: requestKey, loading: true })
 
     getJournalEntries(user.id, { page, entryType, signal: controller.signal })
       .then((data) => {

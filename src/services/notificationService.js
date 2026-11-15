@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { drafts } from '../utils/draftStorage'
 import { createNotificationActions } from '../utils/notificationRequests'
 
 export const pushConfigured = Boolean(import.meta.env.VITE_VAPID_PUBLIC_KEY)
@@ -38,7 +39,11 @@ const browser = {
 const actions = createNotificationActions(supabase, browser)
 export const getReminder = actions.getReminder
 export const disableReminder = actions.disableReminder
-export const signOutWithReminderCleanup = actions.signOutWithReminderCleanup
+export async function signOutWithReminderCleanup(userId, options) {
+  // Seal this user's writers before logout, including delayed autosaves.
+  await drafts.clearUser(userId)
+  return actions.signOutWithReminderCleanup(userId, options)
+}
 
 export async function enableReminder(userId, time) {
   if (!pushConfigured || !supportsPush()) throw new Error('Reminders are not available here yet.')
@@ -47,7 +52,7 @@ export async function enableReminder(userId, time) {
 
 export async function testReminder() {
   const registration = await browser.registration()
-  if (!registration || browser.permission() !== 'granted') throw new Error('Enable reminders first.')
+  if (!registration || browser.permission() !== 'granted') throw new Error('You can enable reminders here if you would like to try a test notification.')
   await registration.showNotification('Your Closure reminder is ready', {
     body: 'This is a test notification on this device.', icon: '/icons/closure-192.png', tag: 'closure-test',
   })

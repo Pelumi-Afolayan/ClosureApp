@@ -1,4 +1,48 @@
-// Push only: this worker never caches pages, API responses or private writing.
+// Cache Storage contains ONLY the build's same-origin public static allowlist.
+// NEVER cache Supabase/API/auth responses, navigation URLs, tokens or private data.
+// Private drafts use a separate, user-scoped IndexedDB store in the app, not here.
+const shell = self.__CLOSURE_SHELL__
+const cacheName = shell ? `closure-shell-${shell.version}` : null
+const assets = new Set(shell?.assets || [])
+
+self.addEventListener('install', event => {
+  if (!shell) return
+  event.waitUntil((async () => {
+    const cache = await caches.open(cacheName)
+    // Fetch only fixed public files, never a current URL with auth parameters.
+    await cache.addAll(shell.assets.map(url => new Request(url, { credentials: 'omit', cache: 'reload' })))
+  })())
+  // A new worker waits. Only the explicit refresh button asks it to activate.
+})
+self.addEventListener('activate', event => {
+  if (!shell) return
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('closure-shell-') && name !== cacheName) await caches.delete(name)
+    }
+    await self.clients.claim()
+  })())
+})
+self.addEventListener('message', event => {
+  if (event.data?.type === 'CLOSURE_ACTIVATE_UPDATE') self.skipWaiting()
+})
+self.addEventListener('fetch', event => {
+  if (!shell || event.request.method !== 'GET') return
+  const url = new URL(event.request.url)
+  if (url.origin !== self.location.origin) return
+  if (event.request.mode === 'navigate') {
+    // Do not cache the navigation response or its URL. An offline route gets
+    // the generic index.html that was fetched without credentials at install.
+    event.respondWith(fetch(event.request).catch(async () => (await caches.open(cacheName)).match('/index.html')))
+    return
+  }
+  if (url.search || !assets.has(url.pathname) || url.pathname === '/index.html') return
+  event.respondWith((async () => {
+    const cache = await caches.open(cacheName)
+    return await cache.match(url.pathname) || fetch(event.request)
+  })())
+})
+
 self.addEventListener('push', (event) => {
   event.waitUntil((async () => {
     // A queued push must not display after this browser has unsubscribed.

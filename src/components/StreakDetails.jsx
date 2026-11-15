@@ -5,7 +5,7 @@ import LoadingPlaceholder from './ui/LoadingPlaceholder'
 import Notice from './ui/Notice'
 import { getActivityWeek } from '../utils/activityDisplay'
 
-export default function StreakDetails({ tracker, kind, timezone }) {
+export default function StreakDetails({ tracker, kind, timezone, showCelebrations = true }) {
   const noContact = kind === 'noContact'
 
   if (tracker.error) {
@@ -30,8 +30,8 @@ export default function StreakDetails({ tracker, kind, timezone }) {
       <p className="streak-note">
         {noContact
           ? days > 0
-            ? `${weeks ? `That’s ${weeks} of confirmed days. ` : ''}You’re giving yourself space. Keep going at your pace.`
-            : 'Confirm a day when you have kept no contact. Your tracker is private and based on what you tell us.'
+            ? `${weeks ? `That’s ${weeks} of confirmed days. ` : ''}There’s no pace you need to keep. You can return when it feels useful.`
+            : 'You can confirm a no-contact day if you choose. The tracker follows only the days you tell us about.'
           : 'Opening Closure while signed in counts once each day. Recording a mood is always optional.'}
       </p>
 
@@ -53,16 +53,17 @@ export default function StreakDetails({ tracker, kind, timezone }) {
       {noContact && (
         <div className="no-contact-confirmation">
           <Button
+            requiresConnection
             disabled={tracker.loading || tracker.saving || tracker.recordedToday}
             onClick={tracker.confirmToday}
           >
             {tracker.saving ? 'Confirming…' : tracker.recordedToday ? 'Today is confirmed' : 'I kept no contact today'}
           </Button>
-          <p className="streak-note">Only confirm once you have kept no contact today. It is not added automatically.</p>
+          <p className="streak-note">If you kept no contact today, you can record it here. Confirmations are optional and never added automatically.</p>
           <Notice variant="success">{tracker.message}</Notice>
         </div>
       )}
-      {noContact && <NoContactMilestone tracker={tracker} />}
+      {noContact && <NoContactMilestone tracker={tracker} showCelebrations={showCelebrations} />}
       <p className="streak-timezone">Days are counted in {timezone}.</p>
     </>
   )

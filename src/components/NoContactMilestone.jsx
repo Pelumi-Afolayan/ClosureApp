@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Award, X } from 'lucide-react'
-import { latestMilestone, milestoneLabel, milestoneMessages } from '../utils/milestones'
+import { getMilestoneAnnouncement, latestMilestone, milestoneLabel, milestoneMessages } from '../utils/milestones'
 import '../styles/Milestones.css'
 
-export default function NoContactMilestone({ tracker }) {
+export default function NoContactMilestone({ tracker, showCelebrations = true }) {
   const dialogRef = useRef(null)
   const announcedRef = useRef(`${tracker.today}:${tracker.current}`)
   const [message, setMessage] = useState(() => milestoneMessages[Math.floor(Math.random() * milestoneMessages.length)])
@@ -17,12 +17,13 @@ export default function NoContactMilestone({ tracker }) {
 
   useEffect(() => {
     // Only a successful manual confirmation can open this automatically.
-    const key = `${today}:${days}`
-    if (!confirmationMessage || error || loading || saving ||
-        !recordedToday || milestone !== days || announcedRef.current === key) return
-    announcedRef.current = key
-    if (!dialogRef.current?.open) dialogRef.current?.showModal()
-  }, [confirmationMessage, error, loading, saving, recordedToday, today, days, milestone])
+    const announcement = getMilestoneAnnouncement({
+      today, current: days, message: confirmationMessage, error, loading, saving, recordedToday,
+    }, announcedRef.current, showCelebrations)
+    if (!announcement) return
+    announcedRef.current = announcement.key
+    if (announcement.open && !dialogRef.current?.open) dialogRef.current?.showModal()
+  }, [confirmationMessage, error, loading, saving, recordedToday, today, days, showCelebrations])
 
   if (!milestone || loading || error) return null
 
@@ -40,7 +41,7 @@ export default function NoContactMilestone({ tracker }) {
           <p>A moment to celebrate</p>
           <h2 id="milestone-title">{milestoneLabel(milestone)} of no contact.</h2>
           <p>{message}</p>
-          <p className="milestone-note">Based on your consecutive confirmed days. A fresh start never takes away the effort you have already made.</p>
+          <p className="milestone-note">Based on your consecutive confirmed days. A gap never takes away the effort you have already made.</p>
         </div>
       </dialog>
     </>

@@ -66,14 +66,15 @@ test('fresh backend runs all migrations in order and every SQL privacy suite', a
   const db = await database()
   try {
     await db.exec(migration)
+    await db.exec(await readFile(new URL('../supabase/migrations/20261115_celebration_preferences.sql', import.meta.url), 'utf8'))
     await fixtures(db)
     const before = await snapshot(db)
     await db.exec(migration)
     assert.deepEqual(await snapshot(db), before, 'rerunning the base migration preserves every existing value')
-    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql']) {
+    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql']) {
       await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
     }
-    for (const name of ['privacy.sql', 'activity_privacy.sql', 'reminders.sql']) {
+    for (const name of ['privacy.sql', 'activity_privacy.sql', 'reminders.sql', 'account_deletion.sql']) {
       await db.exec(await readFile(new URL(`../supabase/tests/${name}`, import.meta.url), 'utf8'))
     }
     assert.deepEqual(await snapshot(db), before, 'SQL privacy tests roll back all fixture changes')
@@ -216,5 +217,87 @@ test('legacy NULL content is rejected without exposing the row or changing live 
     })
     await db.exec('rollback')
     assert.deepEqual(await snapshot(db), before)
+  } finally { await db.close() }
+})
+
+test('account deletion migration repairs missing/non-cascading owner links and remains repeatable', async () => {
+  const db = await database()
+  try {
+    await db.exec(migration)
+    await fixtures(db)
+    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql']) {
+      await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
+    }
+    const before = await snapshot(db)
+    await db.exec(`
+      do $$ declare fk record; begin
+        for fk in select conname, conrelid::regclass as relation from pg_constraint
+          where contype='f' and confrelid='auth.users'::regclass and conrelid in ('public.app_visits'::regclass,'public.reflections'::regclass)
+        loop execute format('alter table %s drop constraint %I',fk.relation,fk.conname); end loop;
+      end $$;
+      alter table public.app_visits add constraint fixture_owner foreign key(user_id) references auth.users(id) on delete restrict;
+    `)
+    const sql = await readFile(new URL('../supabase/migrations/20261115_account_deletion.sql', import.meta.url), 'utf8')
+    await db.exec(sql)
+    await db.exec(sql)
+    await db.exec(await readFile(new URL('../supabase/migrations/20261116_looking_forward.sql', import.meta.url), 'utf8'))
+    assert.equal((await db.query('select public.account_deletion_ready() as ready')).rows[0].ready, true)
+    assert.deepEqual(await snapshot(db), before)
+    await db.exec(await readFile(new URL('../supabase/tests/account_deletion.sql', import.meta.url), 'utf8'))
+    assert.deepEqual(await snapshot(db), before)
+    assert.equal((await db.query("select has_function_privilege('authenticated','public.account_deletion_ready()','execute') as allowed")).rows[0].allowed, false)
+  } finally { await db.close() }
+})
+
+
+test('account deletion SQL fixtures work when profile names have no default', async () => {
+  const db = await database()
+  try {
+    await db.exec(migration)
+    await fixtures(db)
+    for (const name of ['20261111_activity_streaks.sql', '20261112_push_reminders.sql', '20261113_reminder_lifecycle.sql', '20261114_reflections.sql', '20261115_account_deletion.sql', '20261115_celebration_preferences.sql', '20261116_looking_forward.sql']) {
+      await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
+    }
+    await db.exec('alter table public.profiles alter column preferred_name drop default')
+    const before = await snapshot(db)
+    const usersBefore = (await db.query('select id from auth.users order by id')).rows
+    await db.exec(await readFile(new URL('../supabase/tests/account_deletion.sql', import.meta.url), 'utf8'))
+    assert.deepEqual(await snapshot(db), before, 'deletion fixtures leave existing profiles and writing unchanged')
+    assert.deepEqual((await db.query('select id from auth.users order by id')).rows, usersBefore, 'synthetic accounts are rolled back')
+  } finally { await db.close() }
+})
+
+
+test('celebration preference defaults on, preserves opt-outs on rerun and stays owner-only', async () => {
+  const db = await database()
+  try {
+    await db.exec(migration)
+    await fixtures(db)
+    const sql = await readFile(new URL('../supabase/migrations/20261115_celebration_preferences.sql', import.meta.url), 'utf8')
+    const before = (await db.query('select id, preferred_name, goals from public.profiles order by id')).rows
+    await db.exec(sql)
+    assert.deepEqual((await db.query('select show_celebrations from public.profiles')).rows, [{ show_celebrations: true }, { show_celebrations: true }])
+    await asUser(db, accountA, `
+      update public.profiles set show_celebrations = false where id = '${accountA}';
+      do $$ begin
+        if (select show_celebrations from public.profiles where id = '${accountA}') is distinct from false then raise exception 'Owner setting did not save'; end if;
+      end $$;
+    `)
+    await db.exec(`update public.profiles set show_celebrations = false where id = '${accountA}'`)
+    await db.exec(sql)
+    assert.equal((await db.query('select show_celebrations from public.profiles where id = $1', [accountA])).rows[0].show_celebrations, false)
+    await asUser(db, accountB, `
+      do $$ declare affected integer; begin
+        if exists(select 1 from public.profiles where id = '${accountA}') then raise exception 'Stranger read allowed'; end if;
+        update public.profiles set show_celebrations = true where id = '${accountA}';
+        get diagnostics affected = row_count;
+        if affected <> 0 then raise exception 'Stranger preference update allowed'; end if;
+      end $$;
+    `)
+    assert.deepEqual((await db.query('select id, preferred_name, goals from public.profiles order by id')).rows, before)
+    await db.exec(`insert into auth.users(id) values ('33333333-3333-4333-8333-333333333333');
+      insert into public.profiles(id) values ('33333333-3333-4333-8333-333333333333');`)
+    assert.equal((await db.query("select show_celebrations from public.profiles where id = '33333333-3333-4333-8333-333333333333'")).rows[0].show_celebrations, true)
+    await assert.rejects(db.exec(`update public.profiles set show_celebrations = null where id = '${accountA}'`), { code: '23502' })
   } finally { await db.close() }
 })

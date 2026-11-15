@@ -1,0 +1,19 @@
+.privacy-sections {
+  display: grid;
+  gap: var(--space-32);
+}
+
+.privacy-sections h2 {
+  font-size: var(--text-card-heading);
+}
+
+.privacy-sections p {
+  margin-top: var(--space-16);
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.privacy-back {
+  display: inline-block;
+  margin-top: var(--space-32);
+}

@@ -38,8 +38,7 @@
 }
 
 @media (max-width: 540px) {
-
-.today-streak-actions {
+  .today-streak-actions {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -54,4 +53,104 @@
   .no-contact-progress.card {
     padding: var(--space-24);
   }
+}
+
+.no-contact-slip {
+  margin-top: var(--space-32);
+  padding: var(--space-24);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.no-contact-slip summary {
+  cursor: pointer;
+}
+
+.no-contact-slip-content {
+  display: grid;
+  gap: var(--space-16);
+  margin-top: var(--space-16);
+  line-height: 1.75;
+}
+
+.no-contact-slip-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+.no-contact-progress {
+  margin-top: 0;
+}
+
+.no-contact-guidance {
+  margin-top: var(--space-48);
+}
+
+.no-contact-guidance summary {
+  min-height: 2.75rem;
+  padding-block: var(--space-8);
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.no-contact-guidance p {
+  margin-top: var(--space-16);
+}
+
+.streak-week {
+  gap: var(--space-8);
+  margin-block: var(--space-32);
+}
+
+.streak-week li {
+  min-width: 0;
+  gap: var(--space-16);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.streak-day {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.no-contact-confirmation {
+  gap: var(--space-16);
+  margin-top: var(--space-24);
+}
+
+@media (max-width: 540px) {
+  .streak-panel {
+    padding-inline: var(--space-16);
+  }
+}
+
+@media (max-width: 540px) {
+  .no-contact-progress.card {
+    padding-inline: 0;
+  }
+}
+
+.streak-week {
+  grid-template-columns: repeat(7, minmax(2.5rem, 1fr));
+  overflow-x: auto;
+  padding-block: var(--space-8);
+}
+
+
+/* Keep touch targets and the scrollable week robust to shared dashboard rules. */
+.streak-week .streak-day {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.no-contact-progress .streak-week,
+.streak-panel .streak-week {
+  grid-template-columns: repeat(7, minmax(2.5rem, 1fr));
+  overflow-x: auto;
+  padding-block: var(--space-8);
 }

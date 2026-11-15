@@ -24,7 +24,7 @@
   gap: var(--space-8);
   font-size: 1.5rem;
   font-weight: 600;
-  letter-spacing: -.025em;
+  letter-spacing: -0.025em;
 }
 
 .welcome-icon,
@@ -52,7 +52,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-hero);
   line-height: 1.08;
-  letter-spacing: -.025em;
+  letter-spacing: -0.025em;
   font-weight: 400;
 }
 
@@ -243,8 +243,8 @@
   .welcome-title {
     font-size: var(--text-hero);
     font-family: var(--font-heading);
-  font-weight: 400;
-}
+    font-weight: 400;
+  }
 
   .welcome-preview {
     padding: var(--space-32);
@@ -267,8 +267,8 @@
   .welcome-title {
     font-size: var(--text-hero);
     font-family: var(--font-heading);
-  font-weight: 400;
-}
+    font-weight: 400;
+  }
 }
 
 .welcome-account-actions {
@@ -291,4 +291,15 @@
   .welcome-account-actions {
     justify-content: flex-start;
   }
+}
+
+.welcome-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
+.welcome-title-emphasis {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 400;
 }

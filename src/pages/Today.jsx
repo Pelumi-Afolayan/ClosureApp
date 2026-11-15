@@ -1,4 +1,5 @@
 import SupportButton from '../components/SupportButton'
+import SmallSteps from '../components/SmallSteps'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import { Link, useOutletContext } from 'react-router'
@@ -31,7 +32,7 @@ export default function Today({ user, profile }) {
         actions={(
           <div className="today-streak-actions">
             <StreakCard kind="app" />
-            <StreakCard kind="noContact" />
+            <StreakCard kind="noContact" showCelebrations={profile.show_celebrations} />
           </div>
         )}
       />
@@ -41,6 +42,8 @@ export default function Today({ user, profile }) {
         selectedGoals={profile.goals}
         timezone={profile.timezone}
       />
+
+      <SmallSteps userId={user.id} goals={profile.goals} timezone={profile.timezone} />
 
       <section id="today-next" className="today-goals-row" aria-labelledby="next-title">
         <div className="today-goals-heading">

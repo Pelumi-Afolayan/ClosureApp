@@ -1,4 +1,6 @@
 import JournalStartingPoint from './JournalStartingPoint'
+import useLocalDraft from '../hooks/useLocalDraft'
+import DraftNotice from './DraftNotice'
 import { useUrgeSession } from '../hooks/useUrgeSession'
 import { canReleaseLetter, releaseLetter } from '../utils/letterRelease'
 import { saveReflection } from '../services/reflectionService'
@@ -16,7 +18,7 @@ import { validateJournalEntry } from '../utils/journalRequests'
 import '../styles/JournalEditor.css'
 import '../styles/Reflections.css'
 
-export default function JournalEditor({ userId, entry, metadata, selectedGoals = [], onSaved, onCancel, onDeleted }) {
+export default function JournalEditor({ userId, entry, draftKey, fixedEntryType, defaultTitle = '', metadata, selectedGoals = [], onSaved, onCancel, onDeleted }) {
   const { session: reflectionSession } = useUrgeSession()
   const selectionRef = useRef({ start: 0, end: 0 })
   const reflectionMenuRef = useRef(null)
@@ -45,6 +47,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
   const [successMessage, setSuccessMessage] = useState('')
   const [completed, setCompleted] = useState(null)
   const requestRef = useRef(false)
+  const requestAbortRef = useRef(null)
   const dialogRef = useRef(null)
   const activeRef = useRef(false)
 
@@ -53,11 +56,23 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
   const currentValues = JSON.stringify({ title, content, entryType })
   const hasUnsavedChanges = currentValues !== savedValues || Boolean(lesson?.length)
   const blocker = useBlocker(hasUnsavedChanges || Boolean(busy))
+  const localDraft = useLocalDraft({
+    userId, entryKey: `journal:${draftKey || entry?.id || `new:${initialValues.entryType}`}`,
+    values: { title, content, entryType, lesson, lessonKind }, savedAt: entry?.updated_at,
+    dirty: hasUnsavedChanges,
+    onRestore: values => {
+      setTitle(values.title || ''); setContent(values.content || '')
+      setEntryType(fixedEntryType || (values.entryType === 'unsent_letter' ? 'unsent_letter' : 'journal'))
+      setLesson(typeof values.lesson === 'string' ? values.lesson : null)
+      setLessonKind(journalReflectionOptions.some(option => option.kind === values.lessonKind) ? values.lessonKind : 'lesson')
+    },
+  })
 
   useEffect(() => {
     activeRef.current = true
     return () => {
       activeRef.current = false
+      requestAbortRef.current?.abort()
       window.clearTimeout(releaseTimeoutRef.current)
       releaseAnimationRef.current?.(false)
       releaseAnimationRef.current = null
@@ -94,7 +109,6 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
   useEffect(() => {
     if (!completed || hasUnsavedChanges || busy) return
 
-    setCompleted(null)
     if (completed.deleted) onDeleted(completed)
     else onSaved(completed.entry)
   }, [completed, hasUnsavedChanges, busy, onSaved, onDeleted])
@@ -110,12 +124,13 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
     }
 
     requestRef.current = true
+    requestAbortRef.current = new AbortController()
     setBusy('save')
     setErrorMessage('')
     setSuccessMessage('')
 
     try {
-      const savedEntry = await saveJournalEntry({ userId, entryId, title, content, entryType })
+      const savedEntry = await saveJournalEntry({ userId, entryId, title: title.trim() ? title : defaultTitle, content, entryType: fixedEntryType || entryType, signal: requestAbortRef.current.signal })
       if (!activeRef.current) return
 
       setEntryId(savedEntry.id)
@@ -127,11 +142,12 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
         content: savedEntry.content,
         entryType: savedEntry.entry_type,
       }))
+      try { await localDraft.clear() } catch { setErrorMessage('Saved to your account. The device draft could not be cleared. Please discard it after checking your saved writing.'); return }
       setSuccessMessage('Saved. You can come back to this any time.')
       setCompleted({ entry: savedEntry })
     } catch {
       if (activeRef.current) {
-        setErrorMessage('That didn’t save. What you wrote is still here, so try again.')
+        setErrorMessage('Saving was not confirmed. Your words are still here. Check your saved entry before trying again if the connection timed out.')
       }
     } finally {
       requestRef.current = false
@@ -148,17 +164,19 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
     if (!confirmed) return
 
     requestRef.current = true
+    requestAbortRef.current = new AbortController()
     setBusy('delete')
     setErrorMessage('')
 
     try {
-      await deleteJournalEntry(userId, entryId)
+      await deleteJournalEntry(userId, entryId, requestAbortRef.current.signal)
       if (!activeRef.current) return
 
       setSavedValues(currentValues)
+      try { await localDraft.clear() } catch { setErrorMessage('The entry was deleted from your account, but this device draft could not be removed. Clear Closure site data to remove the local copy.'); return }
       setCompleted({ deleted: true })
     } catch {
-      if (activeRef.current) setErrorMessage('Could not delete this entry. Please try again.')
+      if (activeRef.current) setErrorMessage('Deletion was not confirmed. Refresh the list when connected to check whether the entry is still there.')
     } finally {
       requestRef.current = false
       if (activeRef.current) setBusy('')
@@ -193,6 +211,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
   async function handleRelease() {
     if (!releaseAvailable || requestRef.current || lesson !== null) return
     requestRef.current = true
+    requestAbortRef.current = new AbortController()
     setBusy('release')
     setReleaseError('')
     setErrorMessage('')
@@ -209,11 +228,12 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
         }),
         deleteEntry: async (...args) => {
           if (activeRef.current) setReleasePhase('deleting')
-          return deleteJournalEntry(...args)
+          return deleteJournalEntry(...args, requestAbortRef.current.signal)
         },
       })
       if (!activeRef.current || result.cancelled) return
       setSavedValues(currentValues)
+      try { await localDraft.clear() } catch { setErrorMessage('The entry was deleted from your account, but this device draft could not be removed. Clear Closure site data to remove the local copy.'); return }
       setCompleted(result)
       releaseDialogRef.current?.close()
     } catch {
@@ -232,7 +252,8 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
   return (
     <>
       <Card as="form" className={`journal-editor${entryType === 'unsent_letter' ? ' journal-editor--letter' : ''}`} onSubmit={handleSubmit} aria-busy={Boolean(busy)}>
-        <fieldset disabled={Boolean(busy)}>
+        <DraftNotice draft={localDraft} />
+        <fieldset disabled={Boolean(busy) || localDraft.loading || Boolean(localDraft.candidate)}>
           <legend className="writing-accessible-label">{entryId ? 'Edit your writing' : 'Write a new entry'}</legend>
 
 
@@ -271,6 +292,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
               label="Type of writing"
               id="entry-type"
               name="entryType"
+              disabled={Boolean(fixedEntryType)}
               value={entryType}
               onChange={(event) => {
                 setEntryType(event.target.value)
@@ -322,7 +344,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
               <textarea id="journal-lesson" autoFocus rows={4} value={lesson} onChange={event => setLesson(event.target.value)} />
               <p className="journal-editor-hint">{[...lesson].length} / 1,000 characters</p>
               <div className="journal-prompt-actions">
-                <Button type="button" onClick={async () => {
+                <Button type="button" requiresConnection onClick={async () => {
                   const validation = validateReflection({ kind: lessonKind, content: lesson })
                   if (validation) { setErrorMessage(validation); return }
                   if (requestRef.current) return
@@ -336,6 +358,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
                   try {
                     const savedReflection = await saveReflection({ userId, kind: lessonKind, content: lesson })
                     if (activeRef.current) {
+                      await localDraft.discard()
                       reflectionSession.applyChange(savedReflection)
                       setLesson(null)
                       setSuccessMessage("Saved to What I'm learning. Your journal entry is unchanged.")
@@ -366,13 +389,13 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
             </div>
 
             {releaseAvailable && (
-              <Button type="button" secondary className="journal-release-action" disabled={lesson !== null} onClick={openRelease}>
+              <Button type="button" secondary requiresConnection className="journal-release-action" disabled={lesson !== null} onClick={openRelease}>
                 Release this letter
               </Button>
             )}
 
             {entryId && (
-              <Button type="button" variant="quiet" className="journal-delete-text" disabled={lesson !== null} onClick={handleDelete}>
+              <Button type="button" variant="quiet" requiresConnection className="journal-delete-text" disabled={lesson !== null} onClick={handleDelete}>
                 {busy === 'delete' ? 'Deleting…' : 'Delete'}
               </Button>
             )}
@@ -409,7 +432,7 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
         </p>
         <Notice variant="error" title="The release wasn't confirmed">{releaseError}</Notice>
         <div className="letter-release-actions">
-          <Button type="button" disabled={busy === 'release'} onClick={handleRelease}>Release it</Button>
+          <Button type="button" requiresConnection disabled={busy === 'release'} onClick={handleRelease}>Release it</Button>
           <Button type="button" secondary disabled={busy === 'release'} onClick={() => releaseDialogRef.current?.close()} autoFocus>Keep it for now</Button>
         </div>
       </dialog>
@@ -419,7 +442,12 @@ export default function JournalEditor({ userId, entry, metadata, selectedGoals =
         idPrefix="journal-leave"
         busy={Boolean(busy)}
         onStay={() => { setDiscardLesson(false); if (blocker.state === 'blocked') blocker.reset() }}
-        onLeave={() => { if (busy) return; setDiscardLesson(false); setLesson(null); if (blocker.state === 'blocked') blocker.proceed() }}
+        onLeave={async () => {
+          if (busy) return
+          try { await localDraft.discard() } catch { setErrorMessage('The device draft could not be discarded. Please try again.'); return }
+          setDiscardLesson(false); setLesson(null)
+          if (blocker.state === 'blocked') blocker.proceed()
+        }}
       />
     </>
   )

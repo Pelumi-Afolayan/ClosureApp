@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router'
+import { Link, useOutletContext } from 'react-router'
 import { Pause } from 'lucide-react'
 import { useUrgeSession } from '../hooks/useUrgeSession'
+import SupportButton from '../components/SupportButton'
 import Reflections from '../components/Reflections'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
@@ -12,7 +13,8 @@ import '../styles/NoContact.css'
 import '../styles/UrgeFlow.css'
 import '../styles/TodayDashboard.css'
 
-export default function NoContact({ user }) {
+export default function NoContact({ user, profile }) {
+  const { openSupport } = useOutletContext()
   const { noContact, timezone } = useActivity()
   const { session, state } = useUrgeSession()
 
@@ -22,7 +24,7 @@ export default function NoContact({ user }) {
     <PageShell width="narrow" className="no-contact-page">
       <PageHeader
         title="No contact"
-        subtitle="A little space to come back to yourself. Confirm each day when you’re ready."
+        subtitle="A little space to come back to yourself. Confirm a day if you choose."
       />
       <Card className="no-contact-urge-entry">
         <h2>A little space before you decide</h2>
@@ -33,15 +35,25 @@ export default function NoContact({ user }) {
         </Link>
       </Card>
       <Card className="no-contact-progress">
-        <StreakDetails tracker={noContact} kind="noContact" timezone={timezone} />
+        <StreakDetails tracker={noContact} kind="noContact" timezone={timezone} showCelebrations={profile?.show_celebrations} />
       </Card>
       <Reflections key={user.id} userId={user.id} reasonsOnly source={state.reflections} onRetry={session.load} />
+      <details className="no-contact-slip">
+        <summary>If you slipped</summary>
+        <div className="no-contact-slip-content">
+          <p>If you reached out, it happens. Nothing is lost. Tomorrow is a fresh day. You can take a moment here without changing any of your recorded days.</p>
+          <div className="no-contact-slip-actions">
+            <SupportButton onClick={openSupport} />
+            <Link to="/no-contact/urge">Take a pause before reaching out</Link>
+          </div>
+        </div>
+      </details>
       <details className="no-contact-guidance">
         <summary>How this works</summary>
         <p>
           Each confirmed date counts once. Consecutive confirmed dates build your streak.
           A date without a confirmation leaves a gap; it doesn’t tell us whether contact happened.
-          You can start again without making up missed days.
+          Welcome back whenever you return. There’s nothing you need to catch up on.
         </p>
         <p>This tracker follows your confirmations. It does not read your messages or monitor contact.</p>
       </details>

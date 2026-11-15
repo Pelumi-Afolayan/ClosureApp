@@ -1,0 +1,8 @@
+/* Shared typography and cross-component spacing; page rules live with their owner. */
+
+.sign-out-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+}

@@ -1,4 +1,5 @@
 import PageHeader from '../components/PageHeader'
+import '../styles/SignOut.css'
 import PageShell from '../components/PageShell'
 import Notice from '../components/ui/Notice'
 import { useRef, useState } from 'react'

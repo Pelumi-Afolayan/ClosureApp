@@ -22,7 +22,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
   const [checkInDate, setCheckInDate] = useState(() => readDate(timezone))
   const [selectedMoods, setSelectedMoods] = useState([])
   const [note, setNote] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loadedKey, setLoadedKey] = useState(null)
   const [loadError, setLoadError] = useState(false)
   const [saving, setSaving] = useState(false)
   const [hasSavedCheckIn, setHasSavedCheckIn] = useState(false)
@@ -30,6 +30,8 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
   const [saveError, setSaveError] = useState(false)
   const [dayChanged, setDayChanged] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const requestKey = `${userId}:${checkInDate}:${attempt}`
+  const loading = loadedKey !== requestKey
   const savingRef = useRef(false)
   const mountedRef = useRef(false)
 
@@ -45,14 +47,13 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
 
-    setLoading(true)
-    setLoadError(false)
-    setMessage('')
 
     getCheckIn(userId, checkInDate, controller.signal)
       .then((saved) => {
         if (!active) return
 
+        setLoadError(false)
+        setMessage('')
         setSelectedMoods(saved?.moods || [])
         setNote(saved?.note || '')
         setHasSavedCheckIn(Boolean(saved))
@@ -63,7 +64,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
       })
       .finally(() => {
         window.clearTimeout(timeout)
-        if (active) setLoading(false)
+        if (active) setLoadedKey(requestKey)
       })
 
     return () => {
@@ -71,7 +72,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
       controller.abort()
       window.clearTimeout(timeout)
     }
-  }, [userId, checkInDate, attempt])
+  }, [userId, checkInDate, attempt, requestKey])
 
   useEffect(() => {
     function checkDate() {
@@ -104,7 +105,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
     const nextDate = readDate(timezone)
     if (!nextDate || savingRef.current) return
 
-    setLoading(true)
+    setLoadedKey(null)
     setDayChanged(false)
     setSelectedMoods([])
     setNote('')
@@ -189,7 +190,7 @@ export default function DailyCheckIn({ userId, timezone, onSaved }) {
         <>
           {loading && <LoadingPlaceholder label="Loading your check-in…" />}
 
-          {loadError && (
+          {loadError && !loading && (
             <div className="check-in-notice">
               <Notice variant="error">
                 We could not load your saved check-in. Saving is paused to protect your existing note.

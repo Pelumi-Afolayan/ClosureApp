@@ -1,6 +1,13 @@
+import Privacy from './pages/Privacy'
+import NotFound from './pages/NotFound'
+import OfflineWorkspace from './pages/OfflineWorkspace'
+import { usePwa } from './hooks/usePwa'
+import { drafts } from './utils/draftStorage'
+import { authStorageKey } from './lib/supabase'
+import Goodbye from './pages/Goodbye'
 import LoadingPlaceholder from './components/ui/LoadingPlaceholder'
 import Notice from './components/ui/Notice'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 
 import { supabase } from './lib/supabase'
@@ -18,6 +25,9 @@ const redirectFailed = redirectParameters.has('error')
   || new URLSearchParams(window.location.search).has('error')
 
 export default function App() {
+  const { online } = usePwa()
+  const [offlineStart] = useState(() => navigator.onLine === false)
+  const previousUser = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
   const [recoveringPassword, setRecoveringPassword] = useState(false)
@@ -26,6 +36,7 @@ export default function App() {
   const [sessionError, setSessionError] = useState('')
 
   useEffect(() => {
+    if (offlineStart && !online) return
     let active = true
     let receivedAuthEvent = false
 
@@ -40,7 +51,8 @@ export default function App() {
         if (!active) return
 
         if (event === 'PASSWORD_RECOVERY') setRecoveringPassword(true)
-        if (event === 'SIGNED_OUT') setRecoveringPassword(false)
+        if (event === 'SIGNED_OUT') { setRecoveringPassword(false); if (previousUser.current) drafts.clearUser(previousUser.current).catch(() => {}) }
+        previousUser.current = nextSession?.user?.id || null
 
         receivedAuthEvent = true
         window.clearTimeout(timeout)
@@ -56,6 +68,7 @@ export default function App() {
 
         window.clearTimeout(timeout)
         setSessionError(error ? 'Could not restore your session. Please reload and try again.' : '')
+        previousUser.current = data.session?.user?.id || null
         setSession(data.session)
         setLoading(false)
       })
@@ -72,12 +85,22 @@ export default function App() {
       window.clearTimeout(timeout)
       subscription.unsubscribe()
     }
-  }, [])
+  }, [offlineStart, online])
+
+  if (offlineStart && !online && location.pathname !== '/privacy') {
+    let userId = session?.user?.id
+    if (!userId) { try { userId = JSON.parse(localStorage.getItem(authStorageKey))?.user?.id } catch { /* No cached identity. */ } }
+    return <OfflineWorkspace userId={userId} />
+  }
+
+  if (location.pathname === '/privacy') return <Privacy signedIn={Boolean(session)} />
+
+  if (location.pathname === '/goodbye') return <Goodbye />
 
   if (loading) {
     return (
       <main className="auth-state">
-        <LoadingPlaceholder label="Checking your sign-in…" />
+        <LoadingPlaceholder label="Checking your sign-inâ€¦" />
       </main>
     )
   }
@@ -137,7 +160,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/login" element={<Login />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   )

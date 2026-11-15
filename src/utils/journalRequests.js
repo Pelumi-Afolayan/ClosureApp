@@ -1,3 +1,5 @@
+import { withRequestTimeout } from './requestTimeout.js'
+
 export function validateJournalEntry({ content, entryType }) {
   if (!content.trim()) return 'Please write something before saving.'
 
@@ -8,7 +10,7 @@ export function validateJournalEntry({ content, entryType }) {
   return ''
 }
 
-export function createJournalService(client) {
+export function createJournalService(client, { timeoutMs = 15000 } = {}) {
   const fields = 'id, title, content, entry_type, created_at, updated_at'
 
   return {
@@ -50,7 +52,7 @@ export function createJournalService(client) {
       return data
     },
 
-    async saveJournalEntry({ userId, entryId, title, content, entryType }) {
+    async saveJournalEntry({ userId, entryId, title, content, entryType, signal }) {
       const validationError = validateJournalEntry({ content, entryType })
       if (validationError) throw new Error(validationError)
 
@@ -74,20 +76,21 @@ export function createJournalService(client) {
           .insert({ ...entry, user_id: userId })
       }
 
-      const { data, error } = await query.select(fields).single()
+      const { data, error } = await withRequestTimeout(requestSignal => query.select(fields).abortSignal(requestSignal).single(), { signal, timeoutMs })
       if (error) throw error
 
       return data
     },
 
-    async deleteJournalEntry(userId, entryId) {
-      const { data, error } = await client
+    async deleteJournalEntry(userId, entryId, signal) {
+      const { data, error } = await withRequestTimeout(requestSignal => client
         .from('journal_entries')
         .delete()
         .eq('user_id', userId)
         .eq('id', entryId)
         .select('id')
-        .single()
+        .abortSignal(requestSignal)
+        .single(), { signal, timeoutMs })
 
       if (error) throw error
 

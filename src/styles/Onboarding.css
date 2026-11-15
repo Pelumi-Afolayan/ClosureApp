@@ -126,8 +126,37 @@
   cursor: wait;
 }
 
+.celebration-setting,
+.settings-privacy-link {
+  margin-top: var(--space-24);
+}
+
 @media (max-width: 480px) {
   .onboarding-panel {
     padding: var(--space-24);
+  }
+}
+
+.onboarding-panel {
+  max-width: none;
+  padding: var(--space-32);
+}
+
+.onboarding-panel form {
+  margin-top: 0;
+}
+
+.onboarding-goals {
+  gap: var(--space-16);
+  margin-top: var(--space-24);
+}
+
+.onboarding-goal-fieldset {
+  margin-top: var(--space-48);
+}
+
+@media (max-width: 800px) {
+  .onboarding-panel {
+    padding: var(--space-16);
   }
 }

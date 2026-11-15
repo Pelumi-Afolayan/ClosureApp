@@ -163,11 +163,18 @@
   }
 
   .app-content {
-    padding-bottom: calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-16));
+    padding-bottom: calc(
+      var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) +
+        var(--space-16)
+    );
   }
 
   .app-content :is(a, button, input, textarea, select, [tabindex]) {
-    scroll-margin-block: var(--space-24) calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) + var(--space-24));
+    scroll-margin-block: var(--space-24)
+      calc(
+        var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px) +
+          var(--space-24)
+      );
   }
 
   .app-bottom-navigation {
@@ -178,7 +185,9 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--space-8);
     min-height: var(--bottom-navigation-height);
-    padding: var(--space-8) max(var(--space-8), env(safe-area-inset-right, 0px)) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)) max(var(--space-8), env(safe-area-inset-left, 0px));
+    padding: var(--space-8) max(var(--space-8), env(safe-area-inset-right, 0px))
+      calc(var(--space-8) + env(safe-area-inset-bottom, 0px))
+      max(var(--space-8), env(safe-area-inset-left, 0px));
     border-top: 1px solid var(--border-soft);
     background: var(--surface);
   }
@@ -237,4 +246,22 @@
 .app-reflection-links a[aria-current="page"] {
   background: var(--sage-100);
   color: var(--sage-800);
+}
+
+.app-navigation {
+  gap: 4px;
+}
+
+.app-navigation a {
+  height: 44px;
+  min-height: 44px;
+  padding: var(--space-8) var(--space-16);
+  line-height: 1.3;
+}
+
+.app-account-email {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
 }

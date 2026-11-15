@@ -1,14 +1,19 @@
 .today-encouragement {
   display: flex;
   align-items: flex-end;
-  min-height: 24rem;
+  min-height: 0;
   padding: clamp(var(--space-24), 4vw, var(--space-48));
   border-radius: var(--radius-lg);
   background-color: var(--sage-800);
-  background-image: linear-gradient(180deg, rgb(12 26 22 / 25%), rgb(12 26 22 / 80%)), url('/images/encouragement-landscape.png');
+  background-image:
+    linear-gradient(180deg, var(--photo-shade), var(--photo-bottom)),
+    image-set(
+      url("/images/encouragement-landscape.webp") type("image/webp"),
+      url("/images/encouragement-landscape.png") type("image/png")
+    );
   background-position: center;
   background-size: cover;
-  color: var(--on-primary);
+  color: var(--photo-text);
 }
 
 .today-encouragement-copy {
@@ -99,7 +104,7 @@
 .today-feeling[aria-pressed="true"] {
   border-color: var(--sage-600);
   background: var(--sage-600);
-  color: var(--on-primary);
+  color: var(--photo-text);
 }
 
 .today-saved-goals {
@@ -314,15 +319,13 @@
 }
 
 @media (max-width: 1100px) {
-
-.today-writing-grid {
+  .today-writing-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 800px) {
-
-.today-encouragement {
+  .today-encouragement {
     min-height: 25rem;
     background-position: 45% center;
   }
@@ -346,7 +349,6 @@
   .today-card {
     padding: var(--space-24);
   }
-
 }
 
 /* Keep the story and learning links together, with separate tap targets. */
@@ -392,4 +394,223 @@
 
 .today-learning-link svg {
   flex-shrink: 0;
+}
+
+.today-main .page-header-copy {
+  flex-basis: 100%;
+}
+
+.today-main .page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.today-streak-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  width: auto;
+}
+
+.today-streak-actions .streak-trigger {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: var(--space-8) var(--space-16);
+}
+
+.today-goals-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-16);
+  margin-top: var(--space-48);
+}
+
+.today-goals-row h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+.today-goals-row .today-saved-goals {
+  margin: 0;
+  gap: var(--space-8);
+}
+
+.today-goals-row .today-goals-heading {
+  display: contents;
+}
+
+.today-goals-row .today-edit-goals {
+  grid-column: 3;
+  grid-row: 1;
+  padding: var(--space-8) 0;
+}
+
+.today-goals-row .today-saved-goals {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.today-main .today-card,
+.today-main .today-writing {
+  margin-top: var(--space-48);
+}
+
+.today-writing-grid {
+  gap: var(--space-24);
+  margin-top: var(--space-24);
+}
+
+.today-writing-item {
+  align-items: flex-start;
+  gap: var(--space-16);
+  padding: var(--space-24);
+}
+
+.today-writing-item h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.today-writing-item p {
+  min-height: 3.2em;
+  margin-top: var(--space-16);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+  .today-main .page-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .today-main .page-header-actions,
+  .today-streak-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 800px) {
+  .today-streak-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+  }
+}
+
+@media (max-width: 800px) {
+  .today-goals-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 800px) {
+  .today-goals-row .today-edit-goals {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 800px) {
+  .today-goals-row .today-saved-goals {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+.today-encouragement {
+  padding: var(--space-32);
+}
+
+@media (max-width: 800px) {
+  .today-encouragement {
+    padding: var(--space-24);
+  }
+}
+
+.today-encouragement {
+  min-height: 0;
+  padding: var(--space-24);
+  background-image:
+    linear-gradient(180deg, var(--photo-shade), var(--photo-bottom)),
+    image-set(
+      url("/images/encouragement-landscape.webp") type("image/webp"),
+      url("/images/encouragement-landscape.png") type("image/png")
+    );
+}
+
+.today-encouragement .today-card-eyebrow {
+  margin-bottom: var(--space-16);
+  font-weight: 400;
+}
+
+.today-encouragement h2 {
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  line-height: 1.3;
+}
+
+.today-encouragement-copy > p:last-child {
+  margin-top: var(--space-24);
+  color: var(--photo-text);
+  line-height: 1.6;
+}
+
+.today-feelings {
+  width: 100%;
+  max-width: 44rem;
+}
+
+.check-in-timezone {
+  display: block;
+  margin-top: var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.today-feelings .check-in-note-input {
+  width: 100%;
+  min-height: 0;
+  height: auto;
+}
+
+.today-goals-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.today-goals-row .today-saved-goals {
+  grid-column: 2;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.today-goals-row .today-saved-goals li {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.today-goals-row .today-edit-goals {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+@media (min-width: 1101px) {
+  .today-encouragement {
+    min-height: 0;
+  }
+}
+
+.small-steps {
+  margin-top: var(--space-48);
+}
+.small-steps p {
+  margin-top: var(--space-16);
 }

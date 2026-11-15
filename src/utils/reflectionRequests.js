@@ -1,4 +1,4 @@
-export const reflectionKinds = ['lesson', 'my_part', 'next_time', 'reality_check', 'reason']
+export const reflectionKinds = ['lesson', 'my_part', 'next_time', 'reality_check', 'reason', 'looking_forward']
 
 export function validateReflection({ kind, content }) {
   if (!reflectionKinds.includes(kind)) return 'Please choose a reflection type.'

@@ -52,3 +52,34 @@
   --text-quote: clamp(1.5rem, 2.4vw, 1.75rem);
   --text-streak: 1.75rem;
 }
+
+:root {
+  --photo-text: #fff;
+  --photo-solid: #000;
+  --photo-border: rgb(255 255 255 / 60%);
+  --photo-shade: rgb(0 0 0 / 65%);
+  --photo-bottom: rgb(0 0 0 / 90%);
+  --photo-backdrop: rgb(0 0 0 / 75%);
+}
+
+:root[data-theme="dark"] {
+  --paper: #141a17;
+  --surface: #202923;
+  --ink: #edf0e9;
+  --text-muted: #bdc8bb;
+  --sage-100: #293d2f;
+  --sage-600: #a8c99f;
+  --sage-800: #d2e5ca;
+  --clay-100: #3a2b24;
+  --clay-600: #edb28c;
+  --danger: #ffb4ab;
+  --danger-surface: #462c2a;
+  --on-primary: #142417;
+  --border-soft: rgb(200 224 192 / 25%);
+  --border-field: #8fa48c;
+  --hover-surface: rgb(184 215 174 / 12%);
+  --backdrop: rgb(0 0 0 / 65%);
+  --google-border: #aeb5aa;
+  --google-ink: #edf0e9;
+  --shadow-soft: 0 1px 3px rgb(0 0 0 / 40%);
+}

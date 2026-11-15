@@ -69,3 +69,15 @@
     width: 100%;
   }
 }
+
+.page-shell .page-header h1 {
+  font-family: var(--font-heading);
+  font-size: var(--text-page-title);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.page-shell .page-header-subtitle {
+  margin-top: var(--space-16);
+  font-size: 1rem;
+}

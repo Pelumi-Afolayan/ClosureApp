@@ -4,13 +4,13 @@ import Card from './ui/Card'
 import StreakDetails from './StreakDetails'
 import { useActivity } from '../hooks/useActivity'
 
-export default function StreakCard({ kind = 'app' }) {
+export default function StreakCard({ kind = 'app', showCelebrations = true }) {
   const dialogRef = useRef(null)
   const activity = useActivity()
   const tracker = activity[kind]
   const noContact = kind === 'noContact'
   const Icon = noContact ? ShieldCheck : Flame
-  const title = noContact ? 'No contact' : 'App streak'
+  const title = noContact ? 'No contact' : 'App visits'
   const dialogId = `${kind}-streak-dialog`
   const count = `${tracker.current} ${tracker.current === 1 ? 'day' : 'days'}`
 
@@ -25,7 +25,7 @@ export default function StreakCard({ kind = 'app' }) {
         onClick={() => dialogRef.current?.showModal()}
       >
         <Icon size={20} aria-hidden="true" />
-        <span>{noContact ? 'No contact' : 'Check-in streak'}{!tracker.loading && !tracker.error ? `: ${count}` : ''}</span>
+        <span>{noContact ? 'No contact' : 'App visits'}{!tracker.loading && !tracker.error ? `: ${count}` : ''}</span>
       </button>
       <dialog
         ref={dialogRef}
@@ -50,7 +50,7 @@ export default function StreakCard({ kind = 'app' }) {
               <X size={22} aria-hidden="true" />
             </button>
           </div>
-          <StreakDetails tracker={tracker} kind={kind} timezone={activity.timezone} />
+          <StreakDetails tracker={tracker} kind={kind} timezone={activity.timezone} showCelebrations={showCelebrations} />
         </Card>
       </dialog>
     </>

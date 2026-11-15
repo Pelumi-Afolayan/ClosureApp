@@ -268,7 +268,7 @@ declare
   reflection_kind text;
   affected integer;
 begin
-  foreach reflection_kind in array array['lesson', 'my_part', 'next_time', 'reality_check', 'reason'] loop
+  foreach reflection_kind in array array['lesson', 'my_part', 'next_time', 'reality_check', 'reason', 'looking_forward'] loop
     perform set_config('request.jwt.claim.sub', owner_id::text, true);
     perform set_config('request.jwt.claims', json_build_object('sub', owner_id)::text, true);
     insert into public.reflections(user_id, kind, content) values(owner_id, reflection_kind, 'Disposable reflection') returning id into reflection_id;
@@ -300,6 +300,29 @@ begin
     if affected <> 1 then raise exception 'Reflection owner delete failed'; end if;
     insert into closure_privacy_results values ('Reflections: ' || reflection_kind || ' owner CRUD and isolation', 'PASS');
   end loop;
+end;
+$$;
+
+-- The celebration setting is part of the same private, owner-only profile.
+do $$
+declare
+  owner_id uuid := current_setting('closure_test.account_a')::uuid;
+  other_id uuid := current_setting('closure_test.account_b')::uuid;
+  affected integer;
+begin
+  perform set_config('request.jwt.claim.sub', owner_id::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', owner_id)::text, true);
+  update public.profiles set show_celebrations = false where id = owner_id;
+  if (select show_celebrations from public.profiles where id = owner_id) is distinct from false then
+    raise exception 'Owner celebration setting did not save';
+  end if;
+  perform set_config('request.jwt.claim.sub', other_id::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', other_id)::text, true);
+  if exists(select 1 from public.profiles where id = owner_id) then raise exception 'Stranger preference read allowed'; end if;
+  update public.profiles set show_celebrations = true where id = owner_id;
+  get diagnostics affected = row_count;
+  if affected <> 0 then raise exception 'Stranger preference update allowed'; end if;
+  insert into closure_privacy_results values ('Celebration preference: owner read/update and isolation', 'PASS');
 end;
 $$;
 

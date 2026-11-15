@@ -16,7 +16,7 @@
 }
 
 .encouragement-open:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--photo-text);
   outline-offset: -8px;
 }
 
@@ -29,13 +29,13 @@
   border: 0;
   border-radius: var(--radius-lg);
   background: transparent;
-  color: #fff;
+  color: var(--photo-text);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
 .encouragement-dialog::backdrop {
-  background: rgb(0 0 0 / 75%);
+  background: var(--photo-backdrop);
 }
 
 .encouragement-expanded {
@@ -46,7 +46,7 @@
   padding: var(--space-48);
   padding-top: 6rem;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 90%)), url('/images/encouragement-landscape.png') center / cover;
+  background: linear-gradient(180deg, var(--photo-shade), var(--photo-bottom)), image-set(url('/images/encouragement-landscape.webp') type('image/webp'), url('/images/encouragement-landscape.png') type('image/png')) center / cover;
 }
 
 .encouragement-close {
@@ -58,14 +58,14 @@
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 1px solid rgb(255 255 255 / 60%);
+  border: 1px solid var(--photo-border);
   border-radius: var(--radius-pill);
-  background: rgb(0 0 0 / 65%);
-  color: #fff;
+  background: var(--photo-shade);
+  color: var(--photo-text);
 }
 
 .encouragement-close:hover {
-  background: #000;
+  background: var(--photo-solid);
 }
 
 .encouragement-expanded .today-card-eyebrow {
@@ -74,7 +74,7 @@
 
 .encouragement-expanded h2 {
   margin: 0;
-  color: #fff;
+  color: var(--photo-text);
   font-family: var(--font-heading);
   font-size: clamp(1.75rem, 4vw, 2.75rem);
   font-weight: 400;

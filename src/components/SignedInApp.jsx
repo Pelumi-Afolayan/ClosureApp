@@ -1,4 +1,7 @@
 import MoodHistory from '../pages/MoodHistory'
+import Closing from '../pages/Closing'
+import NotFound from '../pages/NotFound'
+import { drafts } from '../utils/draftStorage'
 import UrgeSessionProvider from './UrgeSessionProvider'
 import UrgeFlow from '../pages/UrgeFlow'
 import SupportButton from './SupportButton'
@@ -22,12 +25,15 @@ import Journal from '../pages/Journal'
 import JournalEntry from '../pages/JournalEntry'
 
 export default function SignedInApp({ user }) {
+  useEffect(() => { drafts.begin(user.id) }, [user.id])
   const [supportOpen, setSupportOpen] = useState(false)
   const openSupport = () => setSupportOpen(true)
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loadedKey, setLoadedKey] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [attempt, setAttempt] = useState(0)
+  const requestKey = `${user.id}:${attempt}`
+  const loading = loadedKey !== requestKey
   const [signingOut, setSigningOut] = useState(false)
   const supportDialog = (
     <SupportDialog
@@ -42,12 +48,10 @@ export default function SignedInApp({ user }) {
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
 
-    setLoading(true)
-    setErrorMessage('')
 
     getProfile(user.id, controller.signal)
       .then((savedProfile) => {
-        if (active) setProfile(savedProfile)
+        if (active) { setProfile(savedProfile); setErrorMessage('') }
       })
       .catch(() => {
         if (!active) return
@@ -58,7 +62,7 @@ export default function SignedInApp({ user }) {
       })
       .finally(() => {
         window.clearTimeout(timeout)
-        if (active) setLoading(false)
+        if (active) setLoadedKey(requestKey)
       })
 
     return () => {
@@ -66,7 +70,7 @@ export default function SignedInApp({ user }) {
       window.clearTimeout(timeout)
       controller.abort()
     }
-  }, [user.id, attempt])
+  }, [user.id, attempt, requestKey])
 
   async function handleSignOut() {
     if (signingOut) return
@@ -180,7 +184,7 @@ export default function SignedInApp({ user }) {
 
           <Route
             path="/no-contact"
-            element={profile?.onboarding_complete ? <NoContact user={user} /> : <Navigate to="/onboarding" replace />}
+            element={profile?.onboarding_complete ? <NoContact user={user} profile={profile} /> : <Navigate to="/onboarding" replace />}
           />
 
           <Route
@@ -188,10 +192,12 @@ export default function SignedInApp({ user }) {
             element={profile?.onboarding_complete ? <UrgeFlow user={user} /> : <Navigate to="/onboarding" replace />}
           />
 
+          <Route path="/closing" element={profile?.onboarding_complete ? <Closing user={user} profile={profile} /> : <Navigate to="/onboarding" replace />} />
           <Route path="/sign-out" element={<SignOut userId={user.id} />} />
         </Route>
 
-        <Route path="*" element={<Navigate to={destination} replace />} />
+        <Route path="/" element={<Navigate to={destination} replace />} />
+        <Route path="*" element={<NotFound destination={destination} />} />
       </Routes>
       {supportDialog}
     </UrgeSessionProvider>

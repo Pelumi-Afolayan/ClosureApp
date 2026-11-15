@@ -67,6 +67,13 @@ test('reflection migration creates a missing timestamp helper, enforces constrai
     await db.exec(`insert into public.reflections(user_id,kind,content,updated_at) values ('11111111-1111-4111-8111-111111111111','reason','Words','2000-01-01'); update public.reflections set content='Changed';`)
     const {rows}=await db.query('select updated_at > \'2000-01-01\'::timestamptz as touched from public.reflections')
     assert.equal(rows[0].touched,true)
+    const forward = await readFile(new URL('../supabase/migrations/20261116_looking_forward.sql', import.meta.url), 'utf8')
+    const before = (await db.query('select id, content from public.reflections order by id')).rows
+    await db.exec(forward); await db.exec(forward)
+    assert.deepEqual((await db.query('select id, content from public.reflections order by id')).rows, before)
+    await db.exec("insert into public.reflections(user_id,kind,content) values ('11111111-1111-4111-8111-111111111111','looking_forward','A quiet weekend')")
+    await assert.rejects(db.exec("insert into public.reflections(user_id,kind,content) values ('11111111-1111-4111-8111-111111111111','unknown','Words')"))
+    await assert.rejects(db.exec("insert into public.reflections(user_id,kind,content) values ('11111111-1111-4111-8111-111111111111','looking_forward',' ' )"))
     await db.exec('delete from auth.users');assert.equal((await db.query('select * from public.reflections')).rows.length,0)
   } finally { await db.close() }
 })

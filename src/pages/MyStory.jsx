@@ -1,4 +1,6 @@
 import Reflections from '../components/Reflections'
+import useLocalDraft from '../hooks/useLocalDraft'
+import DraftNotice from '../components/DraftNotice'
 import PageHeader from '../components/PageHeader'
 import PageShell from '../components/PageShell'
 import LoadingPlaceholder from '../components/ui/LoadingPlaceholder'
@@ -29,6 +31,8 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
 
   const hasUnsavedChanges = JSON.stringify(answers) !== savedAnswers
   const blocker = useBlocker(hasUnsavedChanges || saving)
+  const localDraft = useLocalDraft({ userId, entryKey: 'story', values: answers, savedAt: story?.updated_at,
+    dirty: hasUnsavedChanges, onRestore: setAnswers })
 
   useEffect(() => {
     activeRef.current = true
@@ -66,13 +70,14 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
     onSaved(completedStory)
   }, [completedStory, hasUnsavedChanges, saving, onSaved])
 
-  function cancelEditing() {
+  async function cancelEditing() {
     if (savingRef.current) return
 
     if (hasUnsavedChanges && !window.confirm('Discard your unsaved changes and return to reading your saved story?')) {
       return
     }
 
+    try { await localDraft.discard() } catch { setErrorMessage('The device draft could not be discarded. Please try again.'); return }
     onCancel()
   }
 
@@ -99,6 +104,7 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
       setAnswers(saved)
       setSavedAnswers(JSON.stringify(saved))
       setUpdatedAt(savedStory.updated_at)
+      try { await localDraft.clear() } catch { setErrorMessage('Saved to your account. The device draft could not be cleared. Please discard it after checking your saved story.'); return }
       setMessage('Saved. You can come back to this any time.')
       setCompletedStory(savedStory)
     } catch {
@@ -120,7 +126,8 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
       )}
 
       <Card as="form" variant="tinted" className="story-form" onSubmit={handleSave} aria-busy={saving}>
-        <fieldset disabled={saving}>
+        <DraftNotice draft={localDraft} />
+        <fieldset disabled={saving || localDraft.loading || Boolean(localDraft.candidate)}>
           <legend>Your story, in your own time</legend>
           <div className="story-edit-state">
             <span className="story-editing-badge">You’re editing</span>
@@ -187,7 +194,7 @@ function StoryForm({ userId, story, timezone, onSaved, onCancel }) {
         idPrefix="story-leave"
         busy={saving}
         onStay={() => blocker.state === 'blocked' && blocker.reset()}
-        onLeave={() => blocker.state === 'blocked' && blocker.proceed()}
+        onLeave={async () => { try { await localDraft.discard(); if (blocker.state === 'blocked') blocker.proceed() } catch { setErrorMessage('The device draft could not be discarded. Please try again.') } }}
       />
     </>
   )
@@ -238,26 +245,26 @@ function StoryContent({ user, profile, navigation }) {
   const [attempt, setAttempt] = useState(0)
   const [editing, setEditing] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
-  const loading = !result || result.owner !== user.id || result.loading
+  const requestKey = `${user.id}:${attempt}`
+  const loading = !result || result.owner !== user.id || result.key !== requestKey || result.loading
 
   const handleSaved = useCallback((savedStory) => {
-    setResult({ owner: user.id, story: savedStory, loading: false })
+    setResult({ owner: user.id, key: requestKey, story: savedStory, loading: false })
     setEditing(false)
     setSavedMessage('Saved. You can come back to this any time.')
-  }, [user.id])
+  }, [user.id, requestKey])
 
   useEffect(() => {
     let active = true
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 15000)
-    setResult({ owner: user.id, loading: true })
 
     getStory(user.id, controller.signal)
       .then((story) => {
-        if (active) setResult({ owner: user.id, story, loading: false })
+        if (active) setResult({ owner: user.id, key: requestKey, story, loading: false })
       })
       .catch(() => {
-        if (active) setResult({ owner: user.id, error: true, loading: false })
+        if (active) setResult({ owner: user.id, key: requestKey, error: true, loading: false })
       })
       .finally(() => window.clearTimeout(timeout))
 
@@ -266,7 +273,7 @@ function StoryContent({ user, profile, navigation }) {
       controller.abort()
       window.clearTimeout(timeout)
     }
-  }, [user.id, attempt])
+  }, [user.id, attempt, requestKey])
 
   function handleEdit() {
     setSavedMessage('')

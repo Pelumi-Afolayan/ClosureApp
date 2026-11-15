@@ -138,7 +138,9 @@
 @media (max-width: 800px) {
   .story-actions {
     position: sticky;
-    bottom: calc(var(--bottom-navigation-height, 5.5rem) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(
+      var(--bottom-navigation-height, 5.5rem) + env(safe-area-inset-bottom, 0px)
+    );
     z-index: 2;
   }
 }
@@ -147,4 +149,40 @@
   .story-form {
     padding-inline: var(--space-24);
   }
+}
+
+.story-reader.card,
+.story-form {
+  margin-top: 0;
+}
+
+.story-last-saved + .story-form {
+  margin-top: var(--space-24);
+}
+
+.story-reader-section,
+.story-form .field + .field {
+  margin-block: var(--space-48);
+}
+
+.story-form .field:last-of-type {
+  margin-bottom: 0;
+}
+
+.story-reader-answer {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.85;
+}
+
+.story-reader-section h2,
+.story-reader-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+}
+
+.story-form legend {
+  font-family: var(--font-body);
+  font-weight: 500;
 }

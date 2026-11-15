@@ -185,3 +185,23 @@ test('new setup waits for older cleanup before subscribing', async () => {
   await setupReminder
   assert.ok(calls.findIndex(([name]) => name === 'old unsubscribe finished') < calls.findIndex(([name]) => name === 'subscribe'))
 })
+
+
+test('browser registration timeout is explicit and retires a subscription that resolves late', async () => {
+  const { client, browser, calls, subscription } = setup()
+  let release
+  browser.subscribe = () => new Promise(resolve => { release = resolve })
+  const actions = createNotificationActions(client, browser, { registrationTimeoutMs: 10 })
+  await assert.rejects(actions.enableReminder('a', '19:00'), /too long/)
+  assert.ok(!calls.some(([name]) => name === 'rpc'))
+  release(subscription)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.ok(calls.some(([name]) => name === 'unsubscribe'))
+})
+
+test('a stalled permission prompt times out without registering a device', async () => {
+  const { client, browser, calls } = setup({ permissionPromise: new Promise(() => {}) })
+  const actions = createNotificationActions(client, browser, { permissionTimeoutMs: 10 })
+  await assert.rejects(actions.enableReminder('a', '19:00'), /too long/)
+  assert.ok(!calls.some(([name]) => name === 'subscribe' || name === 'rpc'))
+})

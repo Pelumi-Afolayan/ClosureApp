@@ -120,7 +120,7 @@ export default function Welcome() {
       </main>
       <footer className="welcome-footer">
         <span>Closure · A little more room to be you.</span>
-        <span>Your words, at your own pace.</span>
+        <Link to="/privacy">Your privacy</Link>
       </footer>
     </div>
   )
