@@ -35,3 +35,5 @@ Local tests and build can verify the code, but database policies require running
 ## Adding past no-contact confirmations
 
 Apply `migrations/20261117_no_contact_past_days.sql` after the existing activity migration. No Contact now offers an explicit date picker and confirmation action for past days. Duplicate days count once, future dates are rejected, and app visits cannot be backfilled. The welcome-back card uses existing visit dates, not mood check-ins. Its optional absence choice stays in memory and is never sent to the backend. Run the updated `tests/activity_privacy.sql` to verify permissions.
+
+The confirmation UI also accepts an inclusive start/end range or a consecutive-day count ending on a chosen date. Dates before signup are allowed. Each confirmation has the existing 366-date limit; longer histories can use multiple ranges. A preview shows both endpoints and the count; already-recorded dates are omitted before submitting. No new migration is needed beyond `20261117_no_contact_past_days.sql`.

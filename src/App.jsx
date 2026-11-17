@@ -1,3 +1,4 @@
+import useOpeningDelay from './hooks/useOpeningDelay'
 import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 import OfflineWorkspace from './pages/OfflineWorkspace'
@@ -26,6 +27,7 @@ const redirectFailed = redirectParameters.has('error')
 
 export default function App() {
   const { online } = usePwa()
+  const openingReady = useOpeningDelay()
   const [offlineStart] = useState(() => navigator.onLine === false)
   const previousUser = useRef(null)
   const location = useLocation()
@@ -86,6 +88,8 @@ export default function App() {
       subscription.unsubscribe()
     }
   }, [offlineStart, online])
+
+  if (!openingReady && !['/privacy', '/goodbye'].includes(location.pathname)) return <OpeningScreen />
 
   if (offlineStart && !online && location.pathname !== '/privacy') {
     let userId = session?.user?.id

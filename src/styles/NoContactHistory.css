@@ -85,3 +85,90 @@
 .welcome-back__dismiss {
   justify-self: start;
 }
+
+.past-no-contact__modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.past-no-contact__mode {
+  position: relative;
+  cursor: pointer;
+}
+.past-no-contact__mode input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.past-no-contact__mode > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-height: 48px;
+  height: 100%;
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+.past-no-contact__mode svg {
+  flex-shrink: 0;
+}
+.past-no-contact__mode input:checked + span {
+  background: var(--sage-100);
+  border-color: var(--sage-600);
+  color: var(--sage-800);
+}
+.past-no-contact__mode input:focus-visible + span {
+  outline: 2px solid var(--sage-600);
+  outline-offset: 3px;
+}
+.past-no-contact__range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+.past-no-contact__field {
+  display: grid;
+  align-content: start;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.past-no-contact__field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--border-field);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.past-no-contact__preview {
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  border-radius: var(--radius-md);
+  background: var(--sage-100);
+  color: var(--sage-800);
+}
+.past-no-contact__hint {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+@media (max-width: 480px) {
+  .past-no-contact__range {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .past-no-contact__mode > span {
+    padding-inline: var(--space-8);
+    font-size: var(--text-small);
+  }
+}

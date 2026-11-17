@@ -6,6 +6,7 @@
   var dark = preference === 'dark' || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.dataset.theme = dark ? 'dark' : 'light'
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+  document.documentElement.style.backgroundColor = dark ? '#141a17' : '#faf7f0'
   var meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.content = dark ? '#141a17' : '#faf7f0'
 })()

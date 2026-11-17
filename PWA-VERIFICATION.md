@@ -41,3 +41,9 @@ These are instructions, not claims that a device/browser audit was performed. Th
 - Reminders: in an installed, supported secure context, opt in, choose a time and send a test. Then test scheduled delivery when the app has not been opened that day. Check revoked permission, logout and account switching; no notification may show personal text. Delivery timing is browser/network dependent and must be verified against the deployed sender and cron.
 
 References: [Chrome Lighthouse](https://developer.chrome.com/docs/devtools/lighthouse), [PWA debugging](https://developer.chrome.com/docs/devtools/progressive-web-apps), [MDN installation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable), [service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers).
+
+## Opening screen colours and timing
+
+The in-app animated opening stays visible for at least two seconds on a normal fresh app mount, then exits when the sign-in check is ready (profile loading may continue). It does not repeat for every navigation or add two seconds to every request. Privacy and goodbye routes remain immediate. Reduced motion keeps the mark and bar still.
+
+The early theme script paints the saved/system theme before app CSS. The OS-generated installed launch splash uses the manifest’s fixed dark-green background. That OS-owned view cannot run the app’s CSS animation; the branded animation follows once the app starts. Existing installations may retain old launch metadata until the browser updates it; real-device verification is still required. Switching the in-app theme must still update the page background and browser theme colour.

@@ -12,6 +12,7 @@ export function startTheme() {
     const theme = resolveTheme(preference, media.matches)
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme
+    document.documentElement.style.backgroundColor = theme === 'dark' ? '#141a17' : '#faf7f0'
     document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#141a17' : '#faf7f0'
     notify()
   }
@@ -27,6 +28,7 @@ export function setThemePreference(value) {
   const theme = resolveTheme(value, matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.dataset.theme = theme
   document.documentElement.style.colorScheme = theme
+  document.documentElement.style.backgroundColor = theme === 'dark' ? '#141a17' : '#faf7f0'
   document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#141a17' : '#faf7f0'
   notify()
 }
